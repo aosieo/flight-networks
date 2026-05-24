@@ -878,3 +878,21 @@ function initCharts() {
       <div class="ri-card">
         <p class="ri-airport">${a.code}</p>
         <p class="ri-n
+ame">${a.label}</p>
+        <div class="ri-bar-bg">
+          <div class="ri-bar-fill" style="width:${Math.min(pct,100)}%;background:${col}"></div>
+        </div>
+        <p class="ri-pct">${pct}%</p>
+        <p class="ri-note">${pct >= 100 ? 'Exceeded pre-pandemic level' : 'Approaching recovery'}</p>
+      </div>
+    `;
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  triggerFI();
+});
+</script>
+
+</body>
+</html>
