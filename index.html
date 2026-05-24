@@ -4,894 +4,490 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Flight Networks & COVID-19 | SS047</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
 :root{
-  --navy:#0d1b2a;--navy-mid:#1a2e44;--navy-light:#243b55;
-  --cream:#f7f3ee;--cream-dark:#ede7dc;
-  --gold:#c9a84c;--gold-light:#e8c97a;
-  --red:#c0392b;--teal:#1a8f7a;--teal-light:#2ec4a9;
-  --white:#ffffff;--text-dark:#0d1b2a;--text-mid:#3d5268;
-  --font-serif:'Playfair Display',Georgia,serif;
-  --font-sans:'DM Sans',system-ui,sans-serif;
+  --navy:#0d1b2a;
+  --gold:#c9a84c;
+  --gold-light:#e8c97a;
+  --cream:#f7f3ee;
+  --white:#ffffff;
+  --text:#3d5268;
+
+  --font-serif:'Playfair Display',serif;
+  --font-sans:'DM Sans',sans-serif;
   --font-mono:'DM Mono',monospace;
 }
-html{scroll-behavior:smooth}
-body{font-family:var(--font-sans);background:var(--cream);color:var(--text-dark);overflow-x:hidden}
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,27,42,0.97);backdrop-filter:blur(14px);border-bottom:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:62px;}
-.nav-brand{display:flex;flex-direction:column;gap:1px;text-decoration:none}
-.nav-brand-title{font-family:var(--font-serif);font-size:1rem;font-style:italic;color:var(--gold-light)}
-.nav-brand-sub{font-family:var(--font-mono);font-size:0.62rem;color:rgba(201,168,76,0.5);letter-spacing:0.18em;text-transform:uppercase}
-.nav-links{display:flex;gap:0;list-style:none}
-.nav-links li a{color:rgba(255,255,255,0.55);font-size:0.78rem;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;padding:0 1rem;height:62px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
-.nav-links li a:hover,.nav-links li a.active{color:var(--gold-light);border-bottom-color:var(--gold)}
+body{
+  font-family:var(--font-sans);
+  background:var(--cream);
+  color:var(--text);
+  overflow-x:hidden;
+}
 
-/* PAGE SYSTEM */
-.page{display:none;min-height:100vh;padding-top:62px}
-.page.active{display:block}
+nav{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:62px;
+  background:rgba(13,27,42,.96);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 2rem;
+  z-index:1000;
+}
+
+.nav-brand{
+  color:var(--gold-light);
+  font-family:var(--font-serif);
+  text-decoration:none;
+  font-size:1.1rem;
+}
+
+.nav-links{
+  list-style:none;
+  display:flex;
+  gap:1rem;
+}
+
+.nav-links a{
+  color:rgba(255,255,255,.7);
+  text-decoration:none;
+  font-size:.82rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.nav-links a:hover{
+  color:var(--gold-light);
+}
+
+.page{
+  display:none;
+  min-height:100vh;
+  padding-top:62px;
+}
+
+.page.active{
+  display:block;
+}
 
 /* HERO */
-#page-home{padding-top:0;min-height:100vh;background:var(--navy);display:flex;flex-direction:column;}
-.hero-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;min-height:100vh;}
-.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.05) 1px,transparent 1px);background-size:55px 55px;}
-.hero-routes{position:absolute;inset:0;pointer-events:none}
-.route-line{stroke:rgba(201,168,76,0.12);stroke-width:1;fill:none;stroke-dasharray:7 5;animation:dash 22s linear infinite}
-.route-line:nth-child(2){animation-delay:-8s}.route-line:nth-child(3){animation-delay:-15s}.route-line:nth-child(4){animation-delay:-4s}
-@keyframes dash{to{stroke-dashoffset:-240}}
-.route-dot{fill:rgba(201,168,76,0.35);animation:rpulse 3s ease-in-out infinite}
-@keyframes rpulse{0%,100%{opacity:.3}50%{opacity:.9}}
-.hero-content{position:relative;z-index:2;text-align:center;padding:2rem;max-width:820px}
-.hero-badge{display:inline-flex;align-items:center;gap:0.6rem;border:1px solid rgba(201,168,76,0.3);padding:0.4rem 1.1rem;border-radius:2px;margin-bottom:2rem;font-family:var(--font-mono);font-size:0.68rem;color:var(--gold);letter-spacing:0.18em;text-transform:uppercase;opacity:0;animation:fadeUp .7s .1s forwards;}
-.hero-quote{font-family:var(--font-serif);font-size:clamp(2.4rem,5vw,4.2rem);font-weight:900;line-height:1.1;color:var(--white);margin-bottom:1.4rem;opacity:0;animation:fadeUp .8s .3s forwards;}
-.hero-quote em{color:var(--gold-light);font-style:italic}
-.hero-sub{font-size:1rem;color:rgba(255,255,255,0.45);letter-spacing:0.04em;margin-bottom:2.5rem;opacity:0;animation:fadeUp .8s .5s forwards;}
-.hero-cta{display:inline-flex;gap:1rem;opacity:0;animation:fadeUp .8s .7s forwards}
-.btn-gold{background:var(--gold);color:var(--navy);padding:.7rem 1.8rem;border-radius:2px;font-weight:500;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;transition:background .2s}
-.btn-gold:hover{background:var(--gold-light)}
-.btn-ghost{border:1px solid rgba(201,168,76,.35);color:var(--gold-light);padding:.7rem 1.8rem;border-radius:2px;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;background:transparent;cursor:pointer;transition:border-color .2s,color .2s}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
-.stat-strip{background:var(--gold);display:flex;flex-wrap:wrap}
-.stat-item{flex:1;min-width:160px;padding:1.4rem 1.5rem;text-align:center;border-right:1px solid rgba(13,27,42,.15)}
-.stat-item:last-child{border-right:none}
-.stat-num{font-family:var(--font-serif);font-size:2rem;font-weight:900;color:var(--navy);display:block}
-.stat-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--navy-light);font-weight:500}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-.fi{opacity:0;transform:translateY(22px);transition:opacity .65s,transform .65s}
-.fi.vis{opacity:1;transform:translateY(0)}
+#page-home{
+  background:var(--navy);
+  color:white;
+}
+
+.hero-wrap{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:2rem;
+}
+
+.hero-content{
+  max-width:850px;
+}
+
+.hero-badge{
+  display:inline-block;
+  border:1px solid rgba(201,168,76,.3);
+  padding:.5rem 1rem;
+  margin-bottom:2rem;
+  color:var(--gold);
+  font-size:.72rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  font-family:var(--font-mono);
+}
+
+.hero-quote{
+  font-family:var(--font-serif);
+  font-size:clamp(2.5rem,5vw,4.5rem);
+  line-height:1.1;
+  margin-bottom:1rem;
+}
+
+.hero-quote em{
+  color:var(--gold-light);
+}
+
+.hero-sub{
+  color:rgba(255,255,255,.6);
+  margin-bottom:2rem;
+  font-size:1rem;
+}
+
+.hero-cta{
+  display:flex;
+  justify-content:center;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+.btn-gold{
+  background:var(--gold);
+  color:var(--navy);
+  border:none;
+  padding:.9rem 1.8rem;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:600;
+}
+
+.btn-gold:hover{
+  background:var(--gold-light);
+}
+
+.btn-ghost{
+  background:transparent;
+  border:1px solid rgba(201,168,76,.4);
+  color:var(--gold-light);
+  padding:.9rem 1.8rem;
+  cursor:pointer;
+}
+
+.stat-strip{
+  display:flex;
+  flex-wrap:wrap;
+  background:var(--gold);
+}
+
+.stat-item{
+  flex:1;
+  min-width:160px;
+  text-align:center;
+  padding:1.4rem;
+}
+
+.stat-num{
+  display:block;
+  font-family:var(--font-serif);
+  font-size:2rem;
+  color:var(--navy);
+}
+
+.stat-label{
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#243b55;
+}
 
 /* SHARED */
-.sec-inner{max-width:1080px;margin:0 auto;padding:5rem 2rem}
-.sec-label{font-family:var(--font-mono);font-size:.68rem;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;margin-bottom:.6rem}
-.sec-title{font-family:var(--font-serif);font-size:clamp(1.8rem,3.5vw,2.7rem);font-weight:700;line-height:1.2;color:var(--navy);margin-bottom:.9rem}
-.sec-title.light{color:var(--white)}
-.sec-body{font-size:1rem;line-height:1.85;color:var(--text-mid);max-width:660px}
+.sec-inner{
+  max-width:1100px;
+  margin:auto;
+  padding:5rem 2rem;
+}
+
+.sec-label{
+  font-family:var(--font-mono);
+  color:var(--gold);
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  margin-bottom:.5rem;
+  font-size:.72rem;
+}
+
+.sec-title{
+  font-family:var(--font-serif);
+  color:var(--navy);
+  font-size:2.5rem;
+  margin-bottom:1rem;
+}
+
+.sec-body{
+  max-width:700px;
+  line-height:1.9;
+}
 
 /* BACKGROUND */
-#page-background{background:var(--white)}
-.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;margin-top:3rem}
-@media(max-width:680px){.intro-grid{grid-template-columns:1fr;gap:2rem}}
-.intro-pull{font-family:var(--font-serif);font-size:1.45rem;font-style:italic;color:var(--gold);line-height:1.5;border-left:3px solid var(--gold);padding-left:1.4rem;margin-bottom:1.4rem}
-.intro-body{font-size:.96rem;line-height:1.88;color:var(--text-mid)}
-.why-box{background:var(--navy);padding:2.2rem;border-radius:2px}
-.why-box h3{font-family:var(--font-serif);font-size:1.4rem;color:var(--gold-light);margin-bottom:1rem}
-.why-box p{font-size:.92rem;line-height:1.85;color:rgba(255,255,255,.65);margin-bottom:.9rem}
-.why-box p:last-child{margin-bottom:0}
+#page-background{
+  background:white;
+}
 
-/* TIMELINE 2x2 */
-#page-timeline{background:var(--navy)}
-.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:3rem;border:2px solid rgba(201,168,76,.2);border-radius:4px;overflow:hidden;}
-@media(max-width:700px){.tl-grid{grid-template-columns:1fr}}
-.tl-cell{background:rgba(255,255,255,.03);padding:2.5rem 2rem;border:1px solid rgba(201,168,76,.1);opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;}
-.tl-cell.vis{opacity:1;transform:translateY(0)}
-.tl-cell:hover{background:rgba(255,255,255,.06)}
-.tl-era{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--font-mono);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;padding:.3rem .8rem;border-radius:2px;margin-bottom:1rem;font-weight:500;}
-.era-before{background:rgba(201,168,76,.12);color:var(--gold)}
-.era-during{background:rgba(192,57,43,.12);color:#e74c3c}
-.era-after{background:rgba(46,196,169,.12);color:var(--teal-light)}
-.era-impact{background:rgba(100,130,200,.12);color:#7ba7f0}
-.tl-cell-title{font-family:var(--font-serif);font-size:1.25rem;color:var(--white);margin-bottom:.8rem;line-height:1.3}
-.tl-cell-body{font-size:.88rem;line-height:1.8;color:rgba(255,255,255,.6);margin-bottom:1.1rem}
-.tl-pills{display:flex;flex-wrap:wrap;gap:.4rem}
-.tl-pill{font-family:var(--font-mono);font-size:.65rem;padding:.25rem .65rem;border-radius:2px;border:1px solid}
-.pill-gold{border-color:rgba(201,168,76,.3);color:rgba(201,168,76,.7)}
-.pill-red{border-color:rgba(231,76,60,.3);color:rgba(231,76,60,.7)}
-.pill-teal{border-color:rgba(46,196,169,.3);color:rgba(46,196,169,.7)}
-.pill-blue{border-color:rgba(123,167,240,.3);color:rgba(123,167,240,.7)}
-.tl-stat{display:flex;gap:1.5rem;margin-bottom:1rem;padding:1rem;background:rgba(0,0,0,.2);border-radius:2px;}
-.tl-stat-val{font-family:var(--font-serif);font-size:1.6rem;color:var(--gold)}
-.tl-stat-val.red{color:#e74c3c}
-.tl-stat-val.teal{color:var(--teal-light)}
-.tl-stat-lbl{font-size:.78rem;color:rgba(255,255,255,.45);margin-top:.2rem}
+.intro-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:3rem;
+  margin-top:3rem;
+}
 
-/* HUB CARDS */
-#page-hubs{background:var(--cream-dark)}
-.hubs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;margin-top:2.5rem;border:2px solid var(--navy);border-radius:4px;overflow:hidden}
-.hub-card{background:var(--white);padding:2rem 1.6rem;border-right:2px solid var(--navy);transition:background .25s;cursor:default;position:relative}
-.hub-card:last-child{border-right:none}
-.hub-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--gold);transform:scaleX(0);transition:transform .3s}
-.hub-card:hover{background:var(--navy)}
-.hub-card:hover::after{transform:scaleX(1)}
-.hub-code{font-family:var(--font-mono);font-size:2.3rem;font-weight:500;color:var(--gold);display:block;margin-bottom:.3rem}
-.hub-city{font-family:var(--font-serif);font-size:1rem;font-style:italic;color:var(--navy);margin-bottom:.6rem;transition:color .25s}
-.hub-desc{font-size:.85rem;line-height:1.65;color:var(--text-mid);transition:color .25s}
-.hub-card:hover .hub-city{color:var(--white)}
-.hub-card:hover .hub-desc{color:rgba(255,255,255,.55)}
-.hub-type{display:inline-block;font-family:var(--font-mono);font-size:.62rem;padding:.2rem .6rem;background:var(--cream-dark);color:var(--text-mid);border-radius:2px;margin-bottom:.8rem;transition:background .25s,color .25s}
-.hub-card:hover .hub-type{background:rgba(201,168,76,.15);color:var(--gold)}
-.hub-card:hover .hub-code{color:var(--gold-light)}
+@media(max-width:768px){
+  .intro-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+.why-box{
+  background:var(--navy);
+  color:white;
+  padding:2rem;
+}
+
+.why-box h3{
+  color:var(--gold-light);
+  margin-bottom:1rem;
+  font-family:var(--font-serif);
+}
+
+.why-box p{
+  line-height:1.8;
+  color:rgba(255,255,255,.7);
+}
 
 /* ANALYSIS */
-#page-analysis{background:var(--cream)}
-.chart-box{background:var(--white);border:1px solid rgba(13,27,42,.1);border-radius:4px;padding:2rem;margin-top:2rem}
-.chart-controls{display:flex;flex-wrap:wrap;gap:.65rem;margin-bottom:1.5rem}
-.ap-btn{display:flex;align-items:center;gap:.45rem;padding:.4rem .9rem;border-radius:20px;border:1.5px solid;cursor:pointer;font-family:var(--font-mono);font-size:.75rem;font-weight:500;letter-spacing:.05em;transition:all .2s;background:#ffffff;}
-.ap-btn .dot{width:8px;height:8px;border-radius:50%}
-.ap-btn.off{background:#ffffff;opacity:.5}
-.chart-canvas-wrap{position:relative;width:100%;height:350px}
-.chart-insights{background:var(--navy);display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;margin-top:1.5rem;border-radius:2px;overflow:hidden}
-.ci-item{padding:1.25rem 1.5rem;text-align:center;border-right:1px solid rgba(255,255,255,.05)}
-.ci-item:last-child{border-right:none}
-.ci-year{font-family:var(--font-mono);font-size:.65rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.25rem}
-.ci-lbl{font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:.4rem}
-.ci-val{font-family:var(--font-serif);font-size:1.4rem;color:var(--white)}
-.bar-section{margin-top:3rem}
-.bar-section h3{font-family:var(--font-serif);font-size:1.5rem;color:var(--navy);margin-bottom:.4rem}
-.bar-section p{font-size:.9rem;color:var(--text-mid);margin-bottom:1.5rem}
-.bar-box{background:var(--white);border:1px solid rgba(13,27,42,.1);border-radius:4px;padding:2rem;margin-top:1.5rem}
-.recovery-section{margin-top:3rem}
-.ri-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.5rem}
-.ri-card{background:var(--white);border:1px solid rgba(13,27,42,.08);border-radius:4px;padding:1.5rem}
-.ri-airport{font-family:var(--font-mono);font-size:.7rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem}
-.ri-name{font-family:var(--font-serif);font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.8rem}
-.ri-bar-bg{height:8px;background:var(--cream-dark);border-radius:4px;overflow:hidden;margin-bottom:.5rem}
-.ri-bar-fill{height:100%;border-radius:4px;transition:width 1.2s ease}
-.ri-pct{font-family:var(--font-mono);font-size:1.1rem;font-weight:500;color:var(--navy)}
-.ri-note{font-size:.78rem;color:var(--text-mid);margin-top:.3rem}
-.anno-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:2.5rem}
-.anno-card{border-left:3px solid var(--gold);padding:1.1rem 1.4rem;background:var(--white)}
-.anno-card.red-b{border-left-color:var(--red)}
-.anno-card.teal-b{border-left-color:var(--teal)}
-.anno-card.green-b{border-left-color:#27ae60}
-.anno-yr{font-family:var(--font-mono);font-size:.68rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
-.anno-card.red-b .anno-yr{color:var(--red)}
-.anno-card.teal-b .anno-yr{color:var(--teal)}
-.anno-card.green-b .anno-yr{color:#27ae60}
-.anno-h{font-family:var(--font-serif);font-size:.97rem;font-weight:700;margin-bottom:.4rem;color:var(--navy)}
-.anno-p{font-size:.82rem;line-height:1.7;color:var(--text-mid)}
-.tbl-wrap{overflow-x:auto;margin-top:3rem}
-.tbl-title{font-family:var(--font-serif);font-size:1.4rem;margin-bottom:1rem;color:var(--navy)}
-table{width:100%;border-collapse:collapse;font-size:.88rem}
-thead tr{background:var(--navy);color:var(--white)}
-thead th{padding:.8rem 1rem;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;text-align:right}
-thead th:first-child{text-align:left}
-tbody tr{border-bottom:1px solid var(--cream-dark)}
-tbody tr:nth-child(even){background:var(--cream)}
-tbody tr.hl{background:rgba(192,57,43,.06)}
-tbody tr.hl td{color:var(--red)}
-tbody td{padding:.7rem 1rem;text-align:right;color:var(--text-mid)}
-tbody td:first-child{text-align:left;color:var(--navy);font-weight:500}
+.chart-box{
+  background:white;
+  padding:2rem;
+  border-radius:6px;
+  margin-top:2rem;
+}
 
-/* ABOUT / TEAM */
-#page-about{background:var(--white)}
-.course-banner{background:var(--navy);padding:1.5rem 2rem;border-radius:4px;display:flex;align-items:center;gap:2rem;margin-bottom:3rem;flex-wrap:wrap;}
-.cb-code{font-family:var(--font-mono);font-size:2rem;font-weight:500;color:var(--gold)}
-.cb-info h3{font-family:var(--font-serif);font-size:1.1rem;color:var(--white)}
-.cb-info p{font-size:.82rem;color:rgba(255,255,255,.45);margin-top:.15rem;font-family:var(--font-mono);letter-spacing:.08em}
-.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;margin-top:2rem}
-.team-card{background:var(--cream);border-radius:4px;padding:1.75rem 1.5rem;border-top:3px solid var(--gold)}
-.team-avatar{width:52px;height:52px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:1.1rem;color:var(--gold);font-weight:700;margin-bottom:1rem}
-.team-name{font-family:var(--font-serif);font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.25rem}
-.team-role{font-family:var(--font-mono);font-size:.68rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem}
-.team-desc{font-size:.8rem;line-height:1.6;color:var(--text-mid)}
-.project-overview{display:grid;grid-template-columns:2fr 1fr;gap:3rem;align-items:start;margin-top:3rem}
-@media(max-width:680px){.project-overview{grid-template-columns:1fr}}
-.po-text p{font-size:.95rem;line-height:1.88;color:var(--text-mid);margin-bottom:1rem}
-.po-meta{background:var(--cream);padding:1.75rem;border-radius:4px}
-.meta-row{margin-bottom:1.25rem}.meta-row:last-child{margin-bottom:0}
-.meta-lbl{font-family:var(--font-mono);font-size:.65rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.2rem}
-.meta-val{font-size:.88rem;color:var(--navy)}
-.contact-box{background:var(--navy);border-radius:4px;padding:2rem;margin-top:3rem}
-.contact-box h3{font-family:var(--font-serif);font-size:1.3rem;color:var(--gold-light);margin-bottom:.5rem}
-.contact-box p{font-size:.9rem;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:1.2rem}
-.contact-email{display:inline-flex;align-items:center;gap:.6rem;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);padding:.6rem 1.2rem;border-radius:2px;font-family:var(--font-mono);font-size:.82rem;color:var(--gold-light);text-decoration:none;transition:background .2s}
-.contact-email:hover{background:rgba(201,168,76,.2)}
+.chart-controls{
+  display:flex;
+  gap:.8rem;
+  flex-wrap:wrap;
+  margin-bottom:1.5rem;
+}
 
-/* SOURCES */
-#page-sources{background:var(--navy)}
-.sources-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-top:2.5rem}
-.source-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.15);border-radius:2px;padding:1.4rem 1.5rem;transition:border-color .2s,background .2s}
-.source-card:hover{border-color:rgba(201,168,76,.4);background:rgba(255,255,255,.07)}
-.src-num{font-family:var(--font-mono);font-size:.65rem;color:var(--gold);margin-bottom:.35rem}
-.src-title{font-size:.88rem;color:var(--white);margin-bottom:.3rem;font-weight:500}
-.src-authors{font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:.3rem;font-style:italic}
-.src-meta{font-size:.75rem;color:rgba(255,255,255,.32);margin-bottom:.6rem}
-.src-link{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--font-mono);font-size:.7rem;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,168,76,.3);padding-bottom:1px;transition:color .2s,border-color .2s}
-.src-link:hover{color:var(--gold-light);border-color:var(--gold-light)}
-.src-link::after{content:'↗';font-size:.65rem}
-.src-note{font-size:.72rem;color:rgba(255,255,255,.25);margin-top:.5rem;font-style:italic}
+.ap-btn{
+  border:1px solid #ddd;
+  background:white;
+  padding:.5rem 1rem;
+  border-radius:20px;
+  cursor:pointer;
+}
 
-footer{background:var(--navy);border-top:1px solid rgba(201,168,76,.15);text-align:center;padding:1.8rem;font-size:.75rem;color:rgba(255,255,255,.25);font-family:var(--font-mono);letter-spacing:.1em}
+.chart-canvas-wrap{
+  position:relative;
+  width:100%;
+  height:420px;
+}
+
+footer{
+  background:var(--navy);
+  color:rgba(255,255,255,.4);
+  text-align:center;
+  padding:2rem;
+  font-size:.8rem;
+}
 </style>
 </head>
+
 <body>
 
-<!-- NAV -->
 <nav>
-  <a href="#" class="nav-brand" onclick="showPage('home');return false">
-    <span class="nav-brand-title">Global Flight Networks</span>
-    <span class="nav-brand-sub">SS047 · Introduction to Globalization</span>
-  </a>
+  <a href="#" class="nav-brand">Global Flight Networks</a>
+
   <ul class="nav-links">
-    <li><a href="#" onclick="showPage('home');return false" data-page="home" class="active">Home</a></li>
-    <li><a href="#" onclick="showPage('background');return false" data-page="background">Background</a></li>
-    <li><a href="#" onclick="showPage('hubs');return false" data-page="hubs">Case Studies</a></li>
-    <li><a href="#" onclick="showPage('timeline');return false" data-page="timeline">Timeline</a></li>
-    <li><a href="#" onclick="showPage('analysis');return false" data-page="analysis">Analysis</a></li>
-    <li><a href="#" onclick="showPage('about');return false" data-page="about">About</a></li>
-    <li><a href="#" onclick="showPage('sources');return false" data-page="sources">Sources</a></li>
+    <li><a href="#" onclick="showPage('home')">Home</a></li>
+    <li><a href="#" onclick="showPage('background')">Background</a></li>
+    <li><a href="#" onclick="showPage('analysis')">Analysis</a></li>
   </ul>
 </nav>
 
-<!-- PAGE: HOME -->
+<!-- HOME -->
 <div id="page-home" class="page active">
+
   <div class="hero-wrap">
-    <div class="hero-grid"></div>
-    <svg class="hero-routes" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-      <path class="route-line" d="M80,350 Q380,100 700,270 Q920,400 1120,180"/>
-      <path class="route-line" d="M180,520 Q470,200 790,370 Q1000,470 1150,340"/>
-      <path class="route-line" d="M40,140 Q330,360 640,170 Q840,70 1060,310"/>
-      <path class="route-line" d="M140,610 Q400,340 760,510 Q960,590 1110,440"/>
-      <circle class="route-dot" cx="700" cy="270" r="4"/>
-      <circle class="route-dot" cx="380" cy="100" r="3" style="animation-delay:-1.5s"/>
-      <circle class="route-dot" cx="840" cy="70" r="3" style="animation-delay:-2.5s"/>
-      <circle class="route-dot" cx="470" cy="200" r="4" style="animation-delay:-0.8s"/>
-      <circle class="route-dot" cx="1060" cy="310" r="3" style="animation-delay:-3s"/>
-      <circle class="route-dot" cx="140" cy="610" r="3" style="animation-delay:-1.2s"/>
-    </svg>
     <div class="hero-content">
-      <div class="hero-badge">✈ SS047 · Introduction to Globalization · 2026</div>
+
+      <div class="hero-badge">
+        ✈ SS047 · Introduction to Globalization · 2026
+      </div>
+
       <h1 class="hero-quote">
         "One virus.<br>
         Thousands of <em>closed borders.</em><br>
         Millions of cancelled flights."
       </h1>
-      <p class="hero-sub">Global Flight Networks Before and After COVID-19</p>
+
+      <p class="hero-sub">
+        Global Flight Networks Before and After COVID-19
+      </p>
+
       <div class="hero-cta">
-        <button class="btn-gold" onclick="showPage('background')">Explore the Story</button>
-        <button class="btn-ghost" onclick="showPage('analysis')">View Data Analysis →</button>
+        <button class="btn-gold" onclick="showPage('background')">
+          Explore the Story
+        </button>
+
+        <button class="btn-ghost" onclick="showPage('analysis')">
+          View Data Analysis →
+        </button>
       </div>
+
     </div>
   </div>
+
   <div class="stat-strip">
-    <div class="stat-item"><span class="stat-num">−73%</span><span class="stat-label">Passenger drop (LHR 2020)</span></div>
-    <div class="stat-item"><span class="stat-num">3.7M</span><span class="stat-label">Bali at its lowest</span></div>
-    <div class="stat-item"><span class="stat-num">4</span><span class="stat-label">Airport case studies</span></div>
-    <div class="stat-item"><span class="stat-num">95.2M</span><span class="stat-label">Dubai recovered to (2024)</span></div>
-    <div class="stat-item"><span class="stat-num">2017–24</span><span class="stat-label">Years of data tracked</span></div>
+    <div class="stat-item">
+      <span class="stat-num">−73%</span>
+      <span class="stat-label">Passenger Drop</span>
+    </div>
+
+    <div class="stat-item">
+      <span class="stat-num">3.7M</span>
+      <span class="stat-label">Bali Lowest</span>
+    </div>
+
+    <div class="stat-item">
+      <span class="stat-num">95.2M</span>
+      <span class="stat-label">Dubai Recovery</span>
+    </div>
   </div>
+
 </div>
 
-<!-- PAGE: BACKGROUND -->
+<!-- BACKGROUND -->
 <div id="page-background" class="page">
+
   <div class="sec-inner">
-    <p class="sec-label fi">Background</p>
-    <h2 class="sec-title fi">Introduction</h2>
+
+    <p class="sec-label">Background</p>
+
+    <h2 class="sec-title">Introduction</h2>
+
     <div class="intro-grid">
+
       <div>
-        <p class="intro-pull fi">Aviation is globalization made visible — millions of people crossing borders every single day.</p>
-        <p class="intro-body fi">Globalization refers to the increasing interconnectedness of countries through the movement of people, goods, services, and information. One of the most visible infrastructures supporting globalization is the global aviation network, which connects cities and regions through international flight routes.<br><br>Before the COVID-19 pandemic, air travel played a crucial role in enabling global mobility, supporting tourism, international education, migration, and business activities. Major airport hubs functioned as key nodes within a highly integrated global system.<br><br>When the pandemic struck in early 2020, the aviation network became one of the first casualties — and one of the clearest measures — of globalization's sudden reversal. Border closures, travel bans, and quarantine requirements grounded aircraft and emptied terminals within weeks.</p>
+        <p class="sec-body">
+          Globalization refers to the increasing interconnectedness
+          of countries through movement of people, goods, services,
+          and information.
+        </p>
       </div>
-      <div class="why-box fi">
+
+      <div class="why-box">
         <h3>Why This Topic?</h3>
-        <p>The global aviation network was selected as the focus of this project because it provides a clear and measurable representation of globalization in practice. Flight routes connect countries physically, while passenger flows reflect patterns of economic activity, tourism, and human mobility.</p>
-        <p>The COVID-19 pandemic represents one of the most significant disruptions to globalization in recent history. Travel restrictions and border closures led to a dramatic reduction in global mobility, making aviation an ideal case study to analyze how global systems respond to crisis.</p>
-        <p>By examining four distinct airport types — mega-hub, transit hub, policy-sensitive gateway, and tourism sink — we can observe how different nodes in a global network absorb and recover from the same shock at very different rates.</p>
+
+        <p>
+          Aviation provides one of the clearest measurable indicators
+          of globalization and human mobility.
+        </p>
       </div>
+
     </div>
 
-    <div style="margin-top:4rem" class="fi">
-      <p class="sec-label">Key Takeaways</p>
-      <h3 class="sec-title" style="font-size:1.6rem">How Aviation Reflects Globalization</h3>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.5rem">
-      <div style="background:var(--navy);padding:1.5rem;border-radius:4px" class="fi">
-        <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem">Takeaway 01</div>
-        <div style="font-family:var(--font-serif);font-size:1rem;color:var(--white);margin-bottom:.5rem">Interconnectedness</div>
-        <div style="font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.7">Flight routes physically link countries. When COVID-19 emerged, every nation's grounding decision rippled outward — a grounded aircraft is a broken link in the chain of global integration.</div>
-      </div>
-      <div style="background:var(--navy);padding:1.5rem;border-radius:4px" class="fi">
-        <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem">Takeaway 02</div>
-        <div style="font-family:var(--font-serif);font-size:1rem;color:var(--white);margin-bottom:.5rem">Vulnerability</div>
-        <div style="font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.7">Highly integrated systems are also highly vulnerable. A single health event rippled into a synchronized global aviation collapse — every hub fell simultaneously in 2020, regardless of location.</div>
-      </div>
-      <div style="background:var(--navy);padding:1.5rem;border-radius:4px" class="fi">
-        <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem">Takeaway 03</div>
-        <div style="font-family:var(--font-serif);font-size:1rem;color:var(--white);margin-bottom:.5rem">Resilience</div>
-        <div style="font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.7">Globalization doesn't end — it adapts. Digital health passports, rapid safety protocols, and pent-up travel demand fueled a strong recovery. By 2023, most hubs were approaching or surpassing pre-pandemic levels.</div>
-      </div>
-      <div style="background:var(--navy);padding:1.5rem;border-radius:4px" class="fi">
-        <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.5rem">Takeaway 04</div>
-        <div style="font-family:var(--font-serif);font-size:1rem;color:var(--white);margin-bottom:.5rem">Uneven Geography</div>
-        <div style="font-size:.83rem;color:rgba(255,255,255,.55);line-height:1.7">Recovery was not equal across the world. Domestic hubs, transfer powerhouses, and tourism gateways each followed a completely different trajectory — revealing how national policy shapes globalization's pace.</div>
-      </div>
-    </div>
-    <div style="text-align:center;margin-top:4rem" class="fi">
-      <button class="btn-gold" onclick="showPage('timeline')">View Timeline →</button>
-    </div>
   </div>
+
 </div>
 
-<!-- PAGE: CASE STUDIES -->
-<div id="page-hubs" class="page">
-  <div class="sec-inner">
-    <p class="sec-label fi">Case Studies</p>
-    <h2 class="sec-title fi">Selected Global Hubs</h2>
-    <p class="sec-body fi">Four airports — each representing a different node type in the global aviation network — reveal how COVID-19 struck unevenly and recovered at different speeds. Together, they form a complete picture of how a single crisis can simultaneously collapse and then reshape global connectivity.</p>
-
-    <!-- Overall explanation -->
-    <div style="background:var(--navy);border-radius:4px;padding:2rem;margin-top:2rem" class="fi">
-      <p class="sec-label" style="color:var(--gold)">Overall Picture</p>
-      <h3 style="font-family:var(--font-serif);font-size:1.3rem;color:var(--white);margin-bottom:1rem">What These Four Airports Tell Us Together</h3>
-      <p style="font-size:.92rem;line-height:1.85;color:rgba(255,255,255,.65);margin-bottom:.9rem">Before 2020, all four airports were growing steadily — each playing its distinct role in a deeply integrated global network. Atlanta moved the most passengers on earth through its domestic routes; Dubai served as the world's busiest international transfer point; Heathrow anchored the North Atlantic corridor; and Bali welcomed tourists from across Asia and beyond.</p>
-      <p style="font-size:.92rem;line-height:1.85;color:rgba(255,255,255,.65);margin-bottom:.9rem">In 2020, they all fell — but not equally. The collapse was perfectly synchronized across all hubs, confirming aviation's role as a direct index of globalization. What differs is the <em style="color:var(--gold-light)">depth</em> and <em style="color:var(--gold-light)">speed</em> of the fall, which was determined almost entirely by each airport's dependency on international versus domestic traffic.</p>
-      <p style="font-size:.92rem;line-height:1.85;color:rgba(255,255,255,.65)">The recovery pattern is even more revealing: airports with flexible domestic bases (ATL) and strategic government backing (DXB) bounced back first and strongest. Policy-sensitive hubs (LHR) were held back by changing national regulations. Tourism-only gateways (DPS) were the last to recover — and only did so once international borders fully reopened. This is globalization in real time: integrated on the way down, fragmented on the way back up.</p>
-    </div>
-
-    <div class="hubs-grid fi" style="margin-top:2.5rem">
-      <div class="hub-card">
-        <span class="hub-code">ATL</span>
-        <span class="hub-type">Domestic Mega-Hub</span>
-        <p class="hub-city">Atlanta Hartsfield-Jackson, Georgia, USA</p>
-        <p class="hub-desc">The world's busiest airport by total passenger count for over two decades. ATL's resilience during COVID-19 came from a key structural advantage: the majority of its traffic is domestic. When international routes collapsed, US domestic travel — driven by essential workers, cargo, and later leisure travel — kept Atlanta active far beyond its peers.<br><br>In 2020, ATL fell 61% from its 2019 peak of 110.5M to 42.9M — steep, but the shallowest decline among the four. By 2021 it had already partially recovered to 75.7M, and by 2023 it had surpassed its pre-pandemic record. ATL demonstrates that geographic scale and domestic market depth are powerful buffers against global disruption.</p>
-      </div>
-      <div class="hub-card">
-        <span class="hub-code">DPS</span>
-        <span class="hub-type">Tourism Gateway</span>
-        <p class="hub-city">Ngurah Rai International Airport, Bali, Indonesia</p>
-        <p class="hub-desc">Bali's Ngurah Rai airport is almost entirely dependent on international tourism — there is virtually no domestic aviation market that could substitute when borders closed. When Indonesia shut its international borders in April 2020, passenger traffic did not merely decline — it effectively ceased. DPS fell 74% in 2020 and continued to decline in 2021 to just 3.7M passengers, an 85% drop from its 2019 level of 24.1M.<br><br>This extreme vulnerability makes Bali one of the starkest examples of how globalization's benefits — in this case, mass tourism — can be fully reversed by a single policy change. Recovery was slow and uneven, heavily conditional on Indonesia's willingness to reopen borders. DPS's story is a cautionary tale about mono-dependency in a globalized economy.</p>
-      </div>
-      <div class="hub-card">
-        <span class="hub-code">LHR</span>
-        <span class="hub-type">Policy-Sensitive Gateway</span>
-        <p class="hub-city">London Heathrow Airport, United Kingdom</p>
-        <p class="hub-desc">Heathrow is the busiest airport in Europe and one of the world's key long-haul hubs, connecting the UK to over 180 destinations globally. Its COVID-19 trajectory is uniquely shaped by UK government policy — the traffic-light travel system, PCR testing mandates, self-isolation rules, and the complex regulatory aftermath of Brexit all left visible marks on its recovery curve.<br><br>LHR fell 73% to 22.1M in 2020 and continued to decline to 19.4M in 2021 — its absolute lowest — as the UK maintained stricter travel controls than many peers. From 2022, strong demand for transatlantic and European travel drove a rapid rebound, with LHR reaching 84M by 2024. However, it remains slightly below its 2019 peak of 80.9M when adjusted for trend, a reminder that policy environments profoundly shape aviation's recovery.</p>
-      </div>
-      <div class="hub-card">
-        <span class="hub-code">DXB</span>
-        <span class="hub-type">Global Transfer Hub</span>
-        <p class="hub-city">Dubai International Airport, United Arab Emirates</p>
-        <p class="hub-desc">Dubai International is the world's busiest airport for international passengers, serving as the critical bridge between East Asia, South Asia, the Middle East, Africa, and Europe. Its business model depends almost entirely on international transfer traffic — and yet it recovered faster than any other major hub in the world.<br><br>DXB fell 70% to 25.9M in 2020, but the UAE government moved aggressively: reopening Dubai to international tourists in July 2020, implementing rapid COVID-testing protocols at the airport, and positioning Dubai as a "safe corridor" for global travel. By 2021, DXB had already partially recovered, and by 2024 it had surpassed its 2019 peak, reaching 92M. DXB shows that proactive national strategy can overcome even severe structural vulnerability.</p>
-      </div>
-    </div>
-
-    <div style="overflow-x:auto;margin-top:3rem" class="fi">
-      <h3 style="font-family:var(--font-serif);font-size:1.4rem;color:var(--navy);margin-bottom:1rem">Airport Comparison Summary</h3>
-      <table>
-        <thead><tr><th>Airport</th><th>Type</th><th>2019 Passengers</th><th>2020 Drop</th><th>Key Factor</th><th>Recovery Speed</th></tr></thead>
-        <tbody>
-          <tr><td>ATL</td><td>Domestic hub</td><td>110.5M</td><td>−61%</td><td>Domestic demand buffer</td><td>Fast</td></tr>
-          <tr><td>DXB</td><td>Transfer hub</td><td>86.4M</td><td>−70%</td><td>Strategic early reopening</td><td>Very fast</td></tr>
-          <tr><td>LHR</td><td>Int'l gateway</td><td>80.9M</td><td>−73%</td><td>UK policy restrictions</td><td>Moderate</td></tr>
-          <tr class="hl"><td>DPS</td><td>Tourism sink</td><td>24.1M</td><td>−85%</td><td>100% tourism dependent</td><td>Slow</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="text-align:center;margin-top:3rem" class="fi">
-      <button class="btn-gold" onclick="showPage('analysis')">View Full Data Analysis →</button>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE: TIMELINE -->
-<div id="page-timeline" class="page">
-  <div class="sec-inner">
-    <p class="sec-label" style="color:var(--gold)">Timeline</p>
-    <h2 class="sec-title light fi">Global Flight Network Transformation</h2>
-    <p style="color:rgba(255,255,255,.5);font-size:.96rem;max-width:600px;margin-bottom:3rem;line-height:1.8" class="fi">A chronological analysis of how global flight networks evolved before, during, and after the COVID-19 pandemic — revealing both the vulnerability and resilience of globalization. Data sourced from official airport statistics and IATA reports.</p>
-
-    <div class="tl-grid">
-      <div class="tl-cell">
-        <span class="tl-era era-before">✈ 2018–2019 · Before COVID-19</span>
-        <h3 class="tl-cell-title">The Connected Global Network</h3>
-        <div class="tl-stat">
-          <div><div class="tl-stat-val">110.5M</div><div class="tl-stat-lbl">ATL peak (2019)</div></div>
-          <div><div class="tl-stat-val">86.4M</div><div class="tl-stat-lbl">DXB peak (2019)</div></div>
-        </div>
-        <p class="tl-cell-body">The global aviation network was at its most developed — densely interconnected and growing year-on-year, reflecting peak globalization. Atlanta Hartsfield-Jackson topped 110M passengers, cementing its position as the world's busiest airport. Dubai served over 86M international passengers as the world's primary East-West transfer hub. London Heathrow processed nearly 81M passengers on its heavily international route network, and Bali's Ngurah Rai grew steadily to 24.1M, buoyed by surging Asian tourism. Global passenger numbers reached approximately 4.5 billion in 2019, an all-time record.<br><br>Key characteristics of this era: strong year-on-year growth, increasing budget airline penetration, the rise of mega-hubs as globalization's physical nodes, and a diversifying traveler base from emerging economies.</p>
-        <div class="tl-pills">
-          <span class="tl-pill pill-gold">Dense global connections</span>
-          <span class="tl-pill pill-gold">4.5B global passengers (2019)</span>
-          <span class="tl-pill pill-gold">Steady annual growth</span>
-          <span class="tl-pill pill-gold">Mega-hub dominance</span>
-        </div>
-      </div>
-
-      <div class="tl-cell" style="transition-delay:.1s">
-        <span class="tl-era era-during">⚠ 2020–2021 · During COVID-19</span>
-        <h3 class="tl-cell-title">Disruption of Global Mobility</h3>
-        <div class="tl-stat">
-          <div><div class="tl-stat-val red">3.7M</div><div class="tl-stat-lbl">Bali lowest (2021)</div></div>
-          <div><div class="tl-stat-val red">−73%</div><div class="tl-stat-lbl">LHR passenger drop</div></div>
-        </div>
-        <p class="tl-cell-body">The outbreak of COVID-19 in early 2020 triggered unprecedented government responses across the world: border closures, entry bans, mandatory quarantines, and flight suspensions. The International Air Transport Association (IATA) estimated a loss of $137.7 billion to the airline industry in 2020 alone. Globally, passenger numbers fell by 60% — from 4.5 billion in 2019 to 1.8 billion in 2020.<br><br>This impact varied sharply across our four airports. Singapore Changi and London Heathrow experienced sharp declines tied to strict travel controls. Dubai maintained partial connectivity and was among the first to reopen. Bali effectively closed entirely. By 2021, the divergence deepened: Atlanta recovered to 75.7M on domestic traffic, while Bali reached its lowest point of just 3.7M — a staggering 85% below its 2019 peak. IATA data confirmed this was the worst crisis in commercial aviation history.</p>
-        <div class="tl-pills">
-          <span class="tl-pill pill-red">−60% global passengers (2020)</span>
-          <span class="tl-pill pill-red">$137.7B industry loss (IATA)</span>
-          <span class="tl-pill pill-red">Border closures worldwide</span>
-          <span class="tl-pill pill-red">2021: year of divergence</span>
-        </div>
-      </div>
-
-      <div class="tl-cell" style="transition-delay:.15s">
-        <span class="tl-era era-after">↑ 2022–2023 · Recovery</span>
-        <h3 class="tl-cell-title">The Great Resurgence</h3>
-        <div class="tl-stat">
-          <div><div class="tl-stat-val teal">104.6M</div><div class="tl-stat-lbl">ATL back above 2019</div></div>
-          <div><div class="tl-stat-val teal">86.9M</div><div class="tl-stat-lbl">DXB matches 2019</div></div>
-        </div>
-        <p class="tl-cell-body">From 2022 onwards, the global aviation sector began recovering as restrictions lifted and COVID-19 transitioned from pandemic to endemic. The removal of mask mandates, PCR testing requirements, and digital health passport schemes removed friction for travelers. Pent-up demand — particularly for leisure travel — drove explosive growth in bookings. IATA reported global passenger numbers recovered to 68% of 2019 levels in 2022, then 94% in 2023.<br><br>By 2023, Dubai International had matched its 2019 levels at 86.9M and was growing fast. Atlanta fully surpassed its peak at 104.6M. London Heathrow, held back longer by UK-specific regulatory changes, reached 79.2M — close but not yet at its 2019 high. Bali recovered strongly to 21.4M but remained below its pre-pandemic record. The long-term structural shift: digital health integration and new passenger behavioral norms became permanent features of the aviation landscape.</p>
-        <div class="tl-pills">
-          <span class="tl-pill pill-teal">94% global recovery by 2023</span>
-          <span class="tl-pill pill-teal">Pent-up demand explosion</span>
-          <span class="tl-pill pill-teal">Digital health integration</span>
-          <span class="tl-pill pill-teal">ATL & DXB exceed 2019</span>
-        </div>
-      </div>
-
-      <div class="tl-cell" style="transition-delay:.2s">
-        <span class="tl-era era-impact">◈ 2024–2025 · New Global Normal</span>
-        <h3 class="tl-cell-title">Transformation & New Hierarchies</h3>
-        <div class="tl-stat">
-          <div><div class="tl-stat-val teal">92M</div><div class="tl-stat-lbl">DXB surpasses 2019 (2024)</div></div>
-          <div><div class="tl-stat-val" style="color:#7ba7f0">84M</div><div class="tl-stat-lbl">LHR still slightly below</div></div>
-        </div>
-        <p class="tl-cell-body">By 2024, global passenger volumes had fully recovered to and beyond pre-pandemic levels — but the landscape had permanently shifted. Dubai International (DXB) reached 92M in 2024 and reportedly surpassed 100M for the first time in 2023, cementing its status as the world's busiest international airport, a title previously held by Heathrow for decades. Atlanta maintained its position as the world's busiest overall airport above 108M passengers.<br><br>London Heathrow reached 84M in 2024 — recovering well but still slightly below its structural trajectory had there been no pandemic. Bali returned to near pre-pandemic highs at 23.9M, though the pace of recovery reflects structural changes in Indonesian tourism policy and shifting patterns in Asian outbound travel. The pandemic fundamentally reshuffled the global aviation hierarchy: DXB emerged stronger, LHR relatively weaker — a direct consequence of each nation's pandemic strategy and economic positioning.</p>
-        <div class="tl-pills">
-          <span class="tl-pill pill-blue">DXB: world's busiest int'l hub</span>
-          <span class="tl-pill pill-blue">ATL: still world's busiest overall</span>
-          <span class="tl-pill pill-blue">Global hierarchy reshuffled</span>
-          <span class="tl-pill pill-blue">Pandemic legacy: permanent shifts</span>
-        </div>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-top:3rem" class="fi">
-      <button class="btn-gold" onclick="showPage('analysis')">Explore the Data →</button>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE: ANALYSIS -->
+<!-- ANALYSIS -->
 <div id="page-analysis" class="page">
-  <div class="sec-inner">
-    <p class="sec-label fi">Data Analysis</p>
-    <h2 class="sec-title fi">Global Airport Traffic Analysis</h2>
-    <p class="sec-body fi">Air travel serves as a primary indicator of global interconnectedness. This analysis tracks passenger volumes across four key international gateways — toggle airports below to compare their trajectories. Data sourced from official airport statistical reports.</p>
 
-    <div class="chart-box fi">
-      <div class="chart-controls" id="chartControls"></div>
+  <div class="sec-inner">
+
+    <p class="sec-label">Data Analysis</p>
+
+    <h2 class="sec-title">Passenger Traffic Trends</h2>
+
+    <div class="chart-box">
+
       <div class="chart-canvas-wrap">
-        <canvas id="trafficChart" role="img" aria-label="Line chart of passenger volumes 2017-2024">Passenger data 2017-2024.</canvas>
+        <canvas id="trafficChart"></canvas>
       </div>
-      <div class="chart-insights" id="chartInsights">
-        <div class="ci-item"><p class="ci-year">2019 Peak</p><p class="ci-lbl">ATL pre-pandemic high</p><p class="ci-val">110.5M</p></div>
-        <div class="ci-item"><p class="ci-year">2020 Bottom</p><p class="ci-lbl">Bali passengers</p><p class="ci-val" style="color:#e74c3c">6.2M</p></div>
-        <div class="ci-item"><p class="ci-year">2021 Bottom</p><p class="ci-lbl">Bali absolute low</p><p class="ci-val" style="color:#e74c3c">3.7M</p></div>
-        <div class="ci-item"><p class="ci-year">2024</p><p class="ci-lbl">DXB surpasses 2019</p><p class="ci-val" style="color:var(--teal-light)">92M</p></div>
-      </div>
+
     </div>
 
-    <div class="bar-section fi">
-      <h3>2020 Collapse — Percentage Drop from 2019</h3>
-      <p>How severely did each airport fall from its 2019 baseline? Bali's collapse dwarfs the others — a direct result of its 100% dependency on international tourism.</p>
-      <div class="bar-box">
-        <div style="position:relative;width:100%;height:260px">
-          <canvas id="dropChart" role="img" aria-label="Bar chart showing 2020 percentage drops"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="recovery-section fi">
-      <p class="sec-label">Recovery Tracker</p>
-      <h3 class="sec-title" style="font-size:1.5rem">2024 Recovery vs 2019 Baseline</h3>
-      <p style="font-size:.9rem;color:var(--text-mid);margin-top:.3rem">How far has each airport recovered relative to its 2019 pre-pandemic peak? (100% = full recovery, green = exceeded)</p>
-      <div class="ri-grid" id="recoveryGrid"></div>
-    </div>
-
-    <div class="bar-section fi" style="margin-top:3rem">
-      <h3>Year-by-Year Passenger Volumes (All Airports)</h3>
-      <p>Grouped comparison showing all four airports across every year in the dataset. The synchronized 2020 collapse and divergent 2021–2022 recovery are clearly visible.</p>
-      <div class="bar-box">
-        <div style="position:relative;width:100%;height:320px">
-          <canvas id="groupedChart" role="img" aria-label="Grouped bar chart all airports 2017-2024"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div class="anno-grid fi">
-      <div class="anno-card">
-        <p class="anno-yr">2017–2019 · Baseline</p>
-        <h4 class="anno-h">Steady, predictable global growth</h4>
-        <p class="anno-p">ATL consistently above 100M. DXB and LHR track in the high 80s. Bali grows steadily from 21M. No major disruptions — classic globalization in action.</p>
-      </div>
-      <div class="anno-card red-b">
-        <p class="anno-yr">2020 · The Global Collapse</p>
-        <h4 class="anno-h">Total synchronization — every line plummets</h4>
-        <p class="anno-p">LHR drops 73%, DPS drops 74%, DXB 70%, ATL 61%. The chart shows perfect synchronization — a uniquely global crisis affecting every hub simultaneously regardless of type.</p>
-      </div>
-      <div class="anno-card teal-b">
-        <p class="anno-yr">2021 · Year of Divergence</p>
-        <h4 class="anno-h">ATL & DXB pivot up; Bali hits 3.7M</h4>
-        <p class="anno-p">The most revealing year on the chart. ATL recovers to 75.7M on domestic strength. DXB bounces to 29.1M. LHR hits its low at 19.4M. Bali bottoms out at 3.7M — its worst year in decades.</p>
-      </div>
-      <div class="anno-card green-b">
-        <p class="anno-yr">2022–2024 · New Normal</p>
-        <h4 class="anno-h">Dubai outpaces its pre-pandemic self</h4>
-        <p class="anno-p">DXB reaches 92M by 2024 — surpassing its 2019 peak. ATL stable above 108M. LHR at 84M, slightly below its 2019 level. Bali returns to 23.9M, close to its pre-COVID record.</p>
-      </div>
-    </div>
-
-    <div class="tbl-wrap fi">
-      <h3 class="tbl-title">Passenger Data Comparison (Millions)</h3>
-      <table>
-        <thead><tr><th>Year</th><th>Bali (DPS)</th><th>London (LHR)</th><th>Dubai (DXB)</th><th>Atlanta (ATL)</th></tr></thead>
-        <tbody>
-          <tr><td>2017</td><td>21.0</td><td>78.0</td><td>88.2</td><td>103.9</td></tr>
-          <tr><td>2018</td><td>23.7</td><td>80.1</td><td>89.1</td><td>107.4</td></tr>
-          <tr><td>2019</td><td>24.1</td><td>80.9</td><td>86.4</td><td>110.5</td></tr>
-          <tr class="hl"><td>2020 ⚠</td><td>6.2</td><td>22.1</td><td>25.9</td><td>42.9</td></tr>
-          <tr class="hl"><td>2021 ⚠</td><td>3.7</td><td>19.4</td><td>29.1</td><td>75.7</td></tr>
-          <tr><td>2022</td><td>12.5</td><td>61.6</td><td>66.1</td><td>93.7</td></tr>
-          <tr><td>2023</td><td>21.4</td><td>79.2</td><td>86.9</td><td>104.6</td></tr>
-          <tr><td>2024</td><td>23.9</td><td>84.0</td><td>92.0</td><td>108.1</td></tr>
-        </tbody>
-      </table>
-      <p style="font-size:.75rem;color:var(--text-mid);margin-top:.75rem;font-style:italic">Sources: Hartsfield-Jackson Atlanta Annual Reports; UK CAA Airport Data; Dubai Airports Main Fact File; Bali BPS Statistics. ⚠ = COVID-19 impact years.</p>
-    </div>
   </div>
+
 </div>
 
-<!-- PAGE: ABOUT -->
-<div id="page-about" class="page">
-  <div class="sec-inner">
-    <p class="sec-label fi">About This Project</p>
-    <h2 class="sec-title fi">Team & Course Information</h2>
-
-    <div class="course-banner fi">
-      <div class="cb-code">SS047</div>
-      <div class="cb-info">
-        <h3>Introduction to Globalization</h3>
-        <p>Project: Global Flight Networks Before and After COVID-19 · 2026</p>
-      </div>
-    </div>
-
-    <p class="sec-label fi">Team Members</p>
-    <h3 class="sec-title fi" style="font-size:1.5rem">Our Group</h3>
-    <div class="team-grid fi">
-      <div class="team-card">
-        <div class="team-avatar">T</div>
-        <p class="team-name">Thaddeus</p>
-        <p class="team-role">Project Lead & Data Analysis</p>
-        <p class="team-desc">Responsible for overall project coordination, quantitative data collection, and analysis of passenger volume trends across all four airports from 2017 to 2024.</p>
-      </div>
-      <div class="team-card">
-        <div class="team-avatar">MA</div>
-        <p class="team-name">Minh Anh</p>
-        <p class="team-role">Background Research & Theory</p>
-        <p class="team-desc">Responsible for research on globalization theory, aviation history, and constructing the pre-pandemic context and conceptual framework used throughout the project.</p>
-      </div>
-      <div class="team-card">
-        <div class="team-avatar">M</div>
-        <p class="team-name">Melissa</p>
-        <p class="team-role">Case Studies & Content Writing</p>
-        <p class="team-desc">Responsible for writing the four airport case studies — ATL, DXB, LHR, and DPS — along with the timeline narratives and overall analytical commentary.</p>
-      </div>
-      <div class="team-card">
-        <div class="team-avatar">Ti</div>
-        <p class="team-name">Tisha</p>
-        <p class="team-role">Web Design & Data Visualization</p>
-        <p class="team-desc">Responsible for website design, interactive chart development, visual presentation of data findings, and ensuring the site's accessibility and user experience.</p>
-      </div>
-    </div>
-
-    <div class="project-overview fi" style="margin-top:4rem">
-      <div class="po-text">
-        <p class="sec-label">Project Overview</p>
-        <h3 class="sec-title" style="font-size:1.5rem">About This Study</h3>
-        <p>This project examines how the COVID-19 pandemic disrupted and transformed global aviation networks — one of the most measurable expressions of globalization. By tracking passenger volumes at four strategically chosen airports, we can observe how an external shock cascades through an integrated global system and then diverges unevenly in recovery.</p>
-        <p>The choice of ATL, DXB, LHR, and DPS is deliberate: they represent distinct node types. Atlanta is a domestic-led mega-hub, Dubai is a global transfer hub, Heathrow is a policy-sensitive international gateway, and Bali is a pure tourism sink. Together they tell the full story of how globalization collapses and recovers.</p>
-        <p>Through this lens, aviation becomes more than transportation — it becomes a real-time index of globalization itself, reflecting the state of borders, economies, and human mobility across the world.</p>
-      </div>
-      <div class="po-meta">
-        <div class="meta-row"><p class="meta-lbl">Course</p><p class="meta-val">SS047 Introduction to Globalization</p></div>
-        <div class="meta-row"><p class="meta-lbl">Project Title</p><p class="meta-val">Global Flight Networks Before and After COVID-19</p></div>
-        <div class="meta-row"><p class="meta-lbl">Year</p><p class="meta-val">2026</p></div>
-        <div class="meta-row"><p class="meta-lbl">Data Range</p><p class="meta-val">2017 – 2024</p></div>
-        <div class="meta-row"><p class="meta-lbl">Airports</p><p class="meta-val">ATL · DXB · LHR · DPS</p></div>
-        <div class="meta-row"><p class="meta-lbl">Methodology</p><p class="meta-val">Annual passenger volume comparison across pre-, during-, and post-pandemic periods</p></div>
-        <div class="meta-row"><p class="meta-lbl">Key Finding</p><p class="meta-val">Recovery was uneven — airport type and national policy were the strongest determinants</p></div>
-      </div>
-    </div>
-
-    <!-- Contact -->
-    <div class="contact-box fi">
-      <h3>Contact & Inquiries</h3>
-      <p>For academic inquiries, questions about our data sources, or feedback on this project, please reach out to the project team via the Southern University of Science and Technology (SUSTech) student email below. We are happy to share our data methodology or discuss any aspect of our analysis.</p>
-      <p style="font-size:.85rem;color:rgba(255,255,255,.45);margin-bottom:1.2rem">This project was submitted as part of the SS047 Introduction to Globalization course. All data is sourced from publicly available official airport and aviation authority statistics.</p>
-      <a class="contact-email" href="mailto:12412262@mail.sustech.edu.cn">
-        ✉ 12412262@mail.sustech.edu.cn
-      </a>
-      <p style="font-size:.78rem;color:rgba(255,255,255,.3);margin-top:.75rem">Southern University of Science and Technology · Shenzhen, China</p>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE: SOURCES -->
-<div id="page-sources" class="page">
-  <div class="sec-inner">
-    <p class="sec-label" style="color:var(--gold)">Sources</p>
-    <h2 class="sec-title light fi">References & Data Sources</h2>
-    <p style="color:rgba(255,255,255,.5);font-size:.93rem;max-width:640px;margin-bottom:2rem;line-height:1.8" class="fi">All data used in this project is drawn from official airport statistical publications and internationally recognized aviation bodies. Click any source card to visit the original data source. Citations follow APA 7th edition format.</p>
-
-    <div class="sources-grid fi">
-      <div class="source-card">
-        <p class="src-num">1.</p>
-        <p class="src-title">Hartsfield-Jackson Atlanta International Airport — Passenger & Operations Statistics</p>
-        <p class="src-authors">City of Atlanta, Department of Aviation</p>
-        <p class="src-meta">Annual Statistical Reports, 2017–2024 · Atlanta, GA, USA</p>
-        <a class="src-link" href="https://www.atl.com/business-information/statistics/" target="_blank">atl.com/business-information/statistics</a>
-        <p class="src-note">APA: City of Atlanta, Department of Aviation. (2024). <em>ATL airport statistics</em>. https://www.atl.com/business-information/statistics/</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">2.</p>
-        <p class="src-title">UK Airport Data — London Heathrow Passenger Statistics</p>
-        <p class="src-authors">Civil Aviation Authority (CAA), United Kingdom</p>
-        <p class="src-meta">UK Airport Data Series, 2017–2024 · London, UK</p>
-        <a class="src-link" href="https://www.caa.co.uk/data-and-analysis/uk-aviation-market/airports/uk-airport-data/" target="_blank">caa.co.uk/data-and-analysis</a>
-        <p class="src-note">APA: Civil Aviation Authority. (2024). <em>UK airport data</em>. https://www.caa.co.uk/data-and-analysis/uk-aviation-market/airports/uk-airport-data/</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">3.</p>
-        <p class="src-title">Bali Regional Statistics — Passenger Traffic Data, Ngurah Rai Airport</p>
-        <p class="src-authors">Badan Pusat Statistik (BPS) Provinsi Bali</p>
-        <p class="src-meta">Statistical Publications, 2017–2024 · Bali, Indonesia</p>
-        <a class="src-link" href="https://bali.bps.go.id/id" target="_blank">bali.bps.go.id</a>
-        <p class="src-note">APA: Badan Pusat Statistik Provinsi Bali. (2024). <em>Statistik transportasi udara</em>. https://bali.bps.go.id/id</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">4.</p>
-        <p class="src-title">Dubai Airports Main Fact File — Passenger Movement Statistics</p>
-        <p class="src-authors">Dubai Airports Corporation</p>
-        <p class="src-meta">Official Fact File Publication · Dubai, UAE</p>
-        <a class="src-link" href="https://content.presspage.com/uploads/2537/d3582526-371c-4a33-b176-a11777f5b818/dubaiairportsmainfactfile-2.pdf?10000" target="_blank">Dubai Airports Fact File (PDF)</a>
-        <p class="src-note">APA: Dubai Airports. (2023). <em>Dubai Airports main fact file</em>. Dubai Airports Corporation.</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">5.</p>
-        <p class="src-title">Passengers Movement at Dubai Airports — Historical Dataset</p>
-        <p class="src-authors">King Abdullah Petroleum Studies and Research Center (KAPSARC)</p>
-        <p class="src-meta">Open Data Repository, 2010–2024 · Riyadh, Saudi Arabia</p>
-        <a class="src-link" href="https://datasource.kapsarc.org/explore/assets/passengers-movement-at-dubai-airports/" target="_blank">datasource.kapsarc.org</a>
-        <p class="src-note">APA: KAPSARC. (2024). <em>Passengers movement at Dubai airports</em>. https://datasource.kapsarc.org/explore/assets/passengers-movement-at-dubai-airports/</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">6.</p>
-        <p class="src-title">Effects of Novel Coronavirus (COVID-19) on Civil Aviation</p>
-        <p class="src-authors">International Civil Aviation Organization (ICAO)</p>
-        <p class="src-meta">Economic Impact Analysis Series, 2020–2022 · Montreal, Canada</p>
-        <a class="src-link" href="https://www.icao.int/sustainability/Pages/Economic-Impacts-of-COVID-19.aspx" target="_blank">icao.int/sustainability</a>
-        <p class="src-note">APA: ICAO. (2022). <em>Effects of novel coronavirus (COVID-19) on civil aviation</em>. International Civil Aviation Organization.</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">7.</p>
-        <p class="src-title">Airline Industry Economic Performance Reports</p>
-        <p class="src-authors">International Air Transport Association (IATA)</p>
-        <p class="src-meta">Annual Industry Reports, 2020–2024 · Geneva, Switzerland</p>
-        <a class="src-link" href="https://www.iata.org/en/publications/economics/" target="_blank">iata.org/en/publications/economics</a>
-        <p class="src-note">APA: IATA. (2024). <em>Airline industry economic performance</em>. International Air Transport Association.</p>
-      </div>
-
-      <div class="source-card">
-        <p class="src-num">8.</p>
-        <p class="src-title">Air Transport, Passengers Carried — World Development Indicators</p>
-        <p class="src-authors">The World Bank</p>
-        <p class="src-meta">World Bank Open Data · Washington, D.C., USA</p>
-        <a class="src-link" href="https://data.worldbank.org/indicator/IS.AIR.PSGR" target="_blank">data.worldbank.org</a>
-        <p class="src-note">APA: World Bank. (2024). <em>Air transport, passengers carried</em>. World Development Indicators. https://data.worldbank.org/indicator/IS.AIR.PSGR</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<footer>© 2026 · SS047 Introduction to Globalization · Global Flight Networks & COVID-19 · Southern University of Science and Technology</footer>
+<footer>
+  SS047 · Global Flight Networks Project · 2026
+</footer>
 
 <script>
-/* PAGE ROUTER */
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    a.classList.toggle('active', a.dataset.page === id);
-  });
-  window.scrollTo(0,0);
-  setTimeout(triggerFI, 80);
-  if (id === 'analysis') setTimeout(initCharts, 120);
-  if (id === 'timeline') setTimeout(triggerTL, 120);
-}
 
-function triggerFI() {
-  document.querySelectorAll('.page.active .fi').forEach((el,i) => {
-    setTimeout(() => el.classList.add('vis'), i * 60);
+function showPage(page){
+
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
+  document.getElementById('page-' + page).classList.add('active');
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
   });
 }
 
-function triggerTL() {
-  document.querySelectorAll('.tl-cell').forEach((el,i) => {
-    setTimeout(() => el.classList.add('vis'), i * 120);
-  });
-}
+const ctx = document.getElementById('trafficChart');
 
-/* CHART DATA — updated to 2024 as latest year */
-const years = [2017,2018,2019,2020,2021,2022,2023,2024];
-const airports = [
-  {code:'ATL',label:'Atlanta (ATL)',color:'#c9a84c',peak:110.5,p2024:108.1,drop2020:61,data:[103.9,107.4,110.5,42.9,75.7,93.7,104.6,108.1]},
-  {code:'DXB',label:'Dubai (DXB)',  color:'#2ec4a9',peak:86.4, p2024:92.0, drop2020:70,data:[88.2,89.1,86.4,25.9,29.1,66.1,86.9,92.0]},
-  {code:'LHR',label:'London (LHR)', color:'#c9a84c',peak:80.9, p2024:84.0, drop2020:73,data:[78.0,80.1,80.9,22.1,19.4,61.6,79.2,84.0]},
-  {code:'DPS',label:'Bali (DPS)',   color:'#e74c3c',peak:24.1, p2024:23.9, drop2020:74,data:[21.0,23.7,24.1,6.2,3.7,12.5,21.4,23.9]}
-];
-/* distinct colors: ATL=gold, DXB=teal, LHR=blue-ish, DPS=red */
-airports[0].color='#c9a84c';
-airports[1].color='#2ec4a9';
-airports[2].color='#7ba7f0';
-airports[3].color='#e74c3c';
+if(ctx){
 
-let lineChart, dropChart, groupedChart;
-const active = new Set(['ATL','DXB','LHR','DPS']);
-
-function initCharts() {
-  if (lineChart) return;
-
-  const ctrl = document.getElementById('chartControls');
-  ctrl.innerHTML = '';
-  airports.forEach(a => {
-    const btn = document.createElement('button');
-    btn.className = 'ap-btn';
-    btn.style.borderColor = a.color;
-    btn.style.color = a.color;
-    btn.style.background = '#ffffff';
-    btn.innerHTML = `<span class="dot" style="background:${a.color}"></span>${a.label}`;
-    btn.dataset.code = a.code;
-    btn.addEventListener('click', () => {
-      if(active.has(a.code)) { active.delete(a.code); btn.style.background='#ffffff'; btn.style.opacity='.45'; }
-      else { active.add(a.code); btn.style.background='#ffffff'; btn.style.opacity='1'; }
-      lineChart.data.datasets.forEach((ds,i) => { ds.hidden = !active.has(airports[i].code); });
-      lineChart.update();
-    });
-    ctrl.appendChild(btn);
-  });
-
-  lineChart = new Chart(document.getElementById('trafficChart').getContext('2d'), {
+  new Chart(ctx,{
     type:'line',
-    data:{
-      labels:years,
-      datasets:airports.map(a=>({
-        label:a.label, data:a.data,
-        borderColor:a.color, backgroundColor:a.color+'18',
-        borderWidth:2.5, pointRadius:5, pointHoverRadius:8,
-        pointBackgroundColor:a.color, tension:.35, fill:false
-      }))
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#0d1b2a', borderColor:'rgba(201,168,76,.3)', borderWidth:1,
-          titleColor:'#c9a84c', bodyColor:'rgba(255,255,255,.8)', padding:12,
-          callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}M`}
-        }
-      },
-      scales:{
-        x:{grid:{color:'rgba(13,27,42,.06)'},ticks:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11}}},
-        y:{min:0,max:130,grid:{color:'rgba(13,27,42,.06)'},
-          ticks:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11},callback:v=>v+'M'},
-          title:{display:true,text:'Passengers (Millions)',color:'#3d5268',font:{size:11}}}
-      }
-    }
-  });
 
-  dropChart = new Chart(document.getElementById('dropChart').getContext('2d'), {
-    type:'bar',
     data:{
-      labels:airports.map(a=>a.label),
-      datasets:[{
-        label:'% Drop from 2019 to 2020',
-        data:airports.map(a=>a.drop2020),
-        backgroundColor:airports.map(a=>a.color+'cc'),
-        borderColor:airports.map(a=>a.color),
-        borderWidth:2, borderRadius:3
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#0d1b2a',titleColor:'#c9a84c',bodyColor:'rgba(255,255,255,.8)',padding:10,
-          callbacks:{label:c=>`Drop: −${c.parsed.y}%`}
-        }
-      },
-      scales:{
-        x:{grid:{display:false},ticks:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11}}},
-        y:{min:0,max:100,grid:{color:'rgba(13,27,42,.06)'},
-          ticks:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11},callback:v=>'−'+v+'%'}}
-      }
-    }
-  });
+      labels:[
+        '2017',
+        '2018',
+        '2019',
+        '2020',
+        '2021',
+        '2022',
+        '2023',
+        '2024'
+      ],
 
-  groupedChart = new Chart(document.getElementById('groupedChart').getContext('2d'),{
-    type:'bar',
-    data:{
-      labels:years,
-      datasets:airports.map(a=>({
-        label:a.label, data:a.data,
-        backgroundColor:a.color+'bb', borderColor:a.color, borderWidth:1.5, borderRadius:2
-      }))
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{
-          display:true,
-          labels:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11},boxWidth:12,padding:16}
+      datasets:[
+        {
+          label:'Atlanta (ATL)',
+          data:[103.9,107.4,110.5,42.9,75.7,93.7,104.6,108.1],
+          borderWidth:3,
+          tension:.35
         },
-        tooltip:{
-          backgroundColor:'#0d1b2a',titleColor:'#c9a84c',bodyColor:'rgba(255,255,255,.8)',padding:10,
-          callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}M`}
-        }
-      },
-      scales:{
-        x:{grid:{display:false},ticks:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11}}},
-        y:{grid:{color:'rgba(13,27,42,.06)'},
-          ticks:{color:'#3d5268',font:{family:"'DM Mono',monospace",size:11},callback:v=>v+'M'}}
-      }
-    }
-  });
 
-  const grid = document.getElementById('recoveryGrid');
-  grid.innerHTML = '';
-  airports.forEach(a => {
-    const pct = Math.round((a.p2024 / a.peak) * 100);
-    const col = pct >= 100 ? '#2ec4a9' : pct >= 90 ? '#c9a84c' : '#e74c3c';
-    grid.innerHTML += `
-      <div class="ri-card">
-        <p class="ri-airport">${a.code}</p>
-        <p class="ri-n
-ame">${a.label}</p>
-        <div class="ri-bar-bg">
-          <div class="ri-bar-fill" style="width:${Math.min(pct,100)}%;background:${col}"></div>
-        </div>
-        <p class="ri-pct">${pct}%</p>
-        <p class="ri-note">${pct >= 100 ? 'Exceeded pre-pandemic level' : 'Approaching recovery'}</p>
-      </div>
-    `;
+        {
+          label:'Dubai (DXB)',
+          data:[88.2,89.1,86.4,25.9,29.1,66.1,86.9,92.0],
+          borderWidth:3,
+          tension:.35
+        },
+
+        {
+          label:'London (LHR)',
+          data:[78.0,80.1,80.9,22.1,19.4,61.6,79.2,84.0],
+          borderWidth:3,
+          tension:.35
+        },
+
+        {
+          label:'Bali (DPS)',
+          data:[21.0,23.7,24.1,6.2,3.7,12.5,21.4,23.9],
+          borderWidth:3,
+          tension:.35
+        }
+      ]
+    },
+
+    options:{
+      responsive:true,
+      maintainAspectRatio:false
+    }
   });
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  triggerFI();
-});
 </script>
 
 </body>
