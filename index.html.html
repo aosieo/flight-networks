@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Flight Networks & COVID-19</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #1a2e44;
+    --navy-light: #243b55;
+    --cream: #f7f3ee;
+    --cream-dark: #ede7dc;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --red: #c0392b;
+    --teal: #1a8f7a;
+    --teal-light: #2ec4a9;
+    --white: #ffffff;
+    --text-dark: #0d1b2a;
+    --text-mid: #3d5268;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--cream);
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13, 27, 42, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem; height: 60px;
+  }
+  .nav-brand {
+    font-family: var(--font-serif);
+    font-size: 1.05rem; font-style: italic;
+    color: var(--gold-light); letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.65); font-size: 0.85rem;
+    text-decoration: none; letter-spacing: 0.08em;
+    text-transform: uppercase; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--gold-light); }
+  .nav-plane { font-size: 1.3rem; color: var(--gold); }
+
+  /* ── HERO ── */
+  #home {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--navy);
+    position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-routes {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center; padding: 2rem;
+    max-width: 800px;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; color: var(--gold);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-quote {
+    font-family: var(--font-serif);
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 900; line-height: 1.12;
+    color: var(--white); margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.9s 0.4s forwards;
+  }
+  .hero-quote em { color: var(--gold-light); font-style: italic; }
+  .hero-sub {
+    font-size: 1rem; color: rgba(255,255,255,0.5);
+    letter-spacing: 0.05em; margin-bottom: 2.5rem;
+    opacity: 0; animation: fadeUp 0.9s 0.6s forwards;
+  }
+  .hero-cta {
+    display: inline-flex; gap: 1rem;
+    opacity: 0; animation: fadeUp 0.9s 0.8s forwards;
+  }
+  .btn-primary {
+    background: var(--gold); color: var(--navy);
+    padding: 0.75rem 2rem; border-radius: 2px;
+    font-weight: 500; font-size: 0.9rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    text-decoration: none; transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-ghost {
+    border: 1px solid rgba(201,168,76,0.4); color: var(--gold-light);
+    padding: 0.75rem 2rem; border-radius: 2px;
+    font-size: 0.9rem; letter-spacing: 0.06em;
+    text-transform: uppercase; text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── STAT STRIP ── */
+  .stat-strip {
+    background: var(--gold);
+    display: flex; justify-content: center;
+    flex-wrap: wrap; gap: 0;
+  }
+  .stat-item {
+    flex: 1; min-width: 180px;
+    padding: 1.5rem 2rem; text-align: center;
+    border-right: 1px solid rgba(13,27,42,0.15);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: var(--font-serif);
+    font-size: 2.2rem; font-weight: 900;
+    color: var(--navy); display: block;
+  }
+  .stat-label {
+    font-size: 0.75rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--navy-light);
+    font-weight: 500;
+  }
+
+  /* ── SECTION WRAPPER ── */
+  section { scroll-margin-top: 60px; }
+
+  .section-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  /* ── SECTION LABELS ── */
+  .sec-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--gold);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .sec-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700; line-height: 1.2;
+    color: var(--navy); margin-bottom: 1rem;
+  }
+  .sec-title.light { color: var(--white); }
+  .sec-body {
+    font-size: 1.05rem; line-height: 1.8;
+    color: var(--text-mid); max-width: 680px;
+  }
+
+  /* ── HUB CARDS ── */
+  #home-hubs { background: var(--cream-dark); }
+  .hubs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5px; margin-top: 3rem;
+    border: 1.5px solid var(--navy); border-radius: 4px; overflow: hidden;
+  }
+  .hub-card {
+    background: var(--white); padding: 2rem 1.75rem;
+    border-right: 1.5px solid var(--navy);
+    transition: background 0.25s;
+    cursor: default;
+  }
+  .hub-card:last-child { border-right: none; }
+  .hub-card:hover { background: var(--navy); }
+  .hub-code {
+    font-family: var(--font-mono);
+    font-size: 2.5rem; font-weight: 500;
+    color: var(--gold); display: block; margin-bottom: 0.4rem;
+    transition: color 0.25s;
+  }
+  .hub-city {
+    font-family: var(--font-serif);
+    font-size: 1.1rem; font-style: italic;
+    color: var(--navy); margin-bottom: 0.75rem;
+    transition: color 0.25s;
+  }
+  .hub-desc {
+    font-size: 0.88rem; line-height: 1.6;
+    color: var(--text-mid);
+    transition: color 0.25s;
+  }
+  .hub-card:hover .hub-code { color: var(--gold-light); }
+  .hub-card:hover .hub-city { color: var(--white); }
+  .hub-card:hover .hub-desc { color: rgba(255,255,255,0.6); }
+
+  /* ── BACKGROUND / INTRO ── */
+  #background { background: var(--white); }
+  .intro-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: start;
+    margin-top: 3rem;
+  }
+  @media (max-width: 700px) { .intro-split { grid-template-columns: 1fr; gap: 2rem; } }
+  .intro-pull {
+    font-family: var(--font-serif);
+    font-size: 1.5rem; font-style: italic;
+    color: var(--gold); line-height: 1.5;
+    border-left: 3px solid var(--gold);
+    padding-left: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .intro-body { font-size: 0.97rem; line-height: 1.85; color: var(--text-mid); }
+  .why-box {
+    background: var(--navy); color: var(--white);
+    padding: 2.5rem; border-radius: 2px;
+  }
+  .why-box h3 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem; color: var(--gold-light);
+    margin-bottom: 1rem;
+  }
+  .why-box p { font-size: 0.95rem; line-height: 1.8; color: rgba(255,255,255,0.7); margin-bottom: 1rem; }
+  .why-box p:last-child { margin-bottom: 0; }
+
+  /* ── TIMELINE ── */
+  #background-timeline { background: var(--navy); }
+  .timeline { position: relative; margin-top: 3.5rem; padding-left: 2.5rem; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: linear-gradient(to bottom, var(--gold), var(--teal), var(--gold));
+  }
+  .tl-item {
+    position: relative; margin-bottom: 3.5rem;
+    opacity: 0; transform: translateX(-20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .tl-item.visible { opacity: 1; transform: translateX(0); }
+  .tl-dot {
+    position: absolute; left: -2.85rem; top: 0.25rem;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--gold); border: 2px solid var(--navy);
+    box-shadow: 0 0 0 3px var(--gold);
+  }
+  .tl-dot.teal { background: var(--teal-light); box-shadow: 0 0 0 3px var(--teal-light); }
+  .tl-dot.red  { background: #e74c3c;           box-shadow: 0 0 0 3px #e74c3c; }
+  .tl-period {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--gold);
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .tl-heading {
+    font-family: var(--font-serif);
+    font-size: 1.35rem; color: var(--white);
+    margin-bottom: 0.75rem;
+  }
+  .tl-body { font-size: 0.93rem; line-height: 1.8; color: rgba(255,255,255,0.6); max-width: 680px; }
+  .tl-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .tl-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem; padding: 0.3rem 0.75rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: rgba(201,168,76,0.7); border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .tl-tag.teal { border-color: rgba(46,196,169,0.3); color: rgba(46,196,169,0.7); }
+  .tl-tag.red  { border-color: rgba(231,76,60,0.3);  color: rgba(231,76,60,0.7);  }
+
+  /* ── ANALYSIS ── */
+  #analysis { background: var(--cream); }
+  .chart-wrapper {
+    background: var(--white);
+    border: 1px solid rgba(13,27,42,0.1);
+    border-radius: 4px; padding: 2rem;
+    margin-top: 2rem;
+  }
+  .chart-controls {
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .airport-btn {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.45rem 1rem; border-radius: 2px;
+    border: 1.5px solid; cursor: pointer;
+    font-family: var(--font-mono); font-size: 0.8rem;
+    font-weight: 500; letter-spacing: 0.05em;
+    transition: opacity 0.2s, background 0.2s;
+    background: transparent;
+  }
+  .airport-btn .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .airport-btn.inactive { opacity: 0.4; }
+
+  .chart-canvas-wrap {
+    position: relative; width: 100%; height: 360px;
+  }
+  .chart-insight {
+    background: var(--navy);
+    padding: 1.5rem 2rem; margin-top: 1.5rem;
+    border-radius: 2px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .insight-item { text-align: center; }
+  .insight-year {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--gold); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 0.3rem;
+  }
+  .insight-label {
+    font-size: 0.85rem; color: rgba(255,255,255,0.6);
+    margin-bottom: 0.5rem;
+  }
+  .insight-val {
+    font-family: var(--font-serif);
+    font-size: 1.5rem; color: var(--white);
+  }
+
+  /* ── DATA TABLE ── */
+  .data-table-wrap {
+    overflow-x: auto; margin-top: 3rem;
+  }
+  .data-table-title {
+    font-family: var(--font-serif);
+    font-size: 1.4rem; margin-bottom: 1rem;
+    color: var(--navy);
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  thead tr {
+    background: var(--navy); color: var(--white);
+  }
+  thead th {
+    padding: 0.85rem 1.1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem; letter-spacing: 0.1em;
+    text-transform: uppercase; font-weight: 500;
+    text-align: right;
+  }
+  thead th:first-child { text-align: left; }
+  tbody tr { border-bottom: 1px solid var(--cream-dark); }
+  tbody tr:nth-child(even) { background: var(--cream); }
+  tbody tr.highlight { background: rgba(201,168,76,0.08); font-weight: 500; }
+  tbody tr.highlight td { color: var(--red); }
+  tbody td {
+    padding: 0.75rem 1.1rem; text-align: right;
+    color: var(--text-mid);
+  }
+  tbody td:first-child { text-align: left; color: var(--navy); font-weight: 500; }
+  .cell-tag {
+    display: inline-block;
+    font-family: var(--font-mono); font-size: 0.7rem;
+    padding: 0.15rem 0.4rem; border-radius: 2px;
+    background: var(--cream-dark); color: var(--text-mid);
+  }
+
+  /* ── ANNOTATIONS ── */
+  .anno-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; margin-top: 2.5rem;
+  }
+  .anno-card {
+    border-left: 3px solid var(--gold);
+    padding: 1.2rem 1.5rem;
+    background: var(--white);
+  }
+  .anno-card.teal-border { border-left-color: var(--teal); }
+  .anno-card.red-border  { border-left-color: var(--red); }
+  .anno-card.green-border{ border-left-color: #27ae60; }
+  .anno-year {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    color: var(--gold); letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 0.4rem;
+  }
+  .anno-card.teal-border .anno-year { color: var(--teal); }
+  .anno-card.red-border  .anno-year { color: var(--red); }
+  .anno-card.green-border .anno-year { color: #27ae60; }
+  .anno-heading {
+    font-family: var(--font-serif); font-size: 1rem;
+    font-weight: 700; margin-bottom: 0.5rem; color: var(--navy);
+  }
+  .anno-body { font-size: 0.85rem; line-height: 1.7; color: var(--text-mid); }
+
+  /* ── ABOUT ── */
+  #about { background: var(--white); }
+  .about-split {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem; align-items: start;
+    margin-top: 3rem;
+  }
+  @media (max-width: 700px) { .about-split { grid-template-columns: 1fr; } }
+  .about-text p { font-size: 0.97rem; line-height: 1.85; color: var(--text-mid); margin-bottom: 1rem; }
+  .about-meta {
+    background: var(--cream); padding: 1.75rem;
+    border-radius: 2px;
+  }
+  .meta-row { margin-bottom: 1.25rem; }
+  .meta-row:last-child { margin-bottom: 0; }
+  .meta-label {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--gold); letter-spacing: 0.15em;
+    text-transform: uppercase; margin-bottom: 0.25rem;
+  }
+  .meta-val { font-size: 0.9rem; color: var(--navy); }
+
+  /* ── SOURCES ── */
+  #sources { background: var(--navy); }
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem; margin-top: 2.5rem;
+  }
+  .source-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 2px; padding: 1.25rem 1.5rem;
+  }
+  .source-num {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    color: var(--gold); margin-bottom: 0.4rem;
+  }
+  .source-title { font-size: 0.9rem; color: var(--white); margin-bottom: 0.25rem; }
+  .source-meta { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); border-top: 1px solid rgba(201,168,76,0.2);
+    text-align: center; padding: 2rem;
+    font-size: 0.8rem; color: rgba(255,255,255,0.3);
+    font-family: var(--font-mono); letter-spacing: 0.1em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s, transform 0.7s;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── SVG ROUTE LINES ── */
+  .route-line {
+    stroke: rgba(201,168,76,0.15); stroke-width: 1;
+    fill: none;
+    stroke-dasharray: 6 4;
+    animation: dashMove 20s linear infinite;
+  }
+  @keyframes dashMove {
+    to { stroke-dashoffset: -200; }
+  }
+  .route-dot {
+    fill: rgba(201,168,76,0.3);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; r: 3; }
+    50%       { opacity: 0.8; r: 5; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#home" class="nav-brand">Introduction to Globalization</a>
+  <span class="nav-plane">✈</span>
+  <ul class="nav-links">
+    <li><a href="#home" class="active">Home</a></li>
+    <li><a href="#background">Background</a></li>
+    <li><a href="#analysis">Analysis</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#sources">Sources</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+  <div class="hero-grid"></div>
+  <svg class="hero-routes" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+    <path class="route-line" d="M100,350 Q400,100 700,280 Q900,400 1100,200"/>
+    <path class="route-line" d="M200,500 Q500,200 800,380 Q1000,480 1150,350" style="animation-delay:-7s"/>
+    <path class="route-line" d="M50,150 Q350,350 650,180 Q850,80 1050,300" style="animation-delay:-13s"/>
+    <path class="route-line" d="M150,600 Q400,350 750,500 Q950,580 1100,450" style="animation-delay:-4s"/>
+    <circle class="route-dot" cx="700" cy="280" r="4"/>
+    <circle class="route-dot" cx="400" cy="100" r="3" style="animation-delay:-1.5s"/>
+    <circle class="route-dot" cx="850" cy="80" r="3" style="animation-delay:-2.5s"/>
+    <circle class="route-dot" cx="500" cy="200" r="4" style="animation-delay:-0.8s"/>
+    <circle class="route-dot" cx="1050" cy="300" r="3" style="animation-delay:-3s"/>
+  </svg>
+  <div class="hero-content">
+    <p class="hero-eyebrow">SS047 · Introduction to Globalization · Global Flight Networks</p>
+    <h1 class="hero-quote">
+      "One virus.<br>
+      Thousands of <em>closed borders.</em><br>
+      Millions of cancelled flights."
+    </h1>
+    <p class="hero-sub">Global Flight Networks Before and After COVID-19</p>
+    <div class="hero-cta">
+      <a href="#background" class="btn-primary">Explore the Story</a>
+      <a href="#analysis" class="btn-ghost">View Data →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STAT STRIP -->
+<div class="stat-strip">
+  <div class="stat-item">
+    <span class="stat-num">−73%</span>
+    <span class="stat-label">Passenger drop in 2020</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">3.7M</span>
+    <span class="stat-label">Bali passengers at lowest</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">4</span>
+    <span class="stat-label">Case study airports</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">2017–25</span>
+    <span class="stat-label">Years of data tracked</span>
+  </div>
+</div>
+
+<!-- HUBS -->
+<section id="home-hubs">
+  <div class="section-inner">
+    <p class="sec-label fade-in">Selected Case Studies</p>
+    <h2 class="sec-title fade-in">Global Hubs & Their Stories</h2>
+    <p class="sec-body fade-in">Four airports — each representing a different type of node in the global aviation network — reveal how COVID-19 struck unevenly across the world.</p>
+    <div class="hubs-grid fade-in">
+      <div class="hub-card">
+        <span class="hub-code">ATL</span>
+        <p class="hub-city">Atlanta, Georgia</p>
+        <p class="hub-desc">The Domestic Giant. World's busiest hub stayed resilient during the pandemic — massive US domestic demand outperformed collapsed international routes.</p>
+      </div>
+      <div class="hub-card">
+        <span class="hub-code">DPS</span>
+        <p class="hub-city">Bali, Indonesia</p>
+        <p class="hub-desc">The Tourist Gateway. Purely tourism-dependent, Bali saw the deepest traffic collapse as strict international border closures cut off its only source of passengers.</p>
+      </div>
+      <div class="hub-card">
+        <span class="hub-code">LHR</span>
+        <p class="hub-city">London, UK</p>
+        <p class="hub-desc">The Policy Hub. A critical North Atlantic transit point, Heathrow's recovery curve reflects changing UK travel regulations and testing mandates in real time.</p>
+      </div>
+      <div class="hub-card">
+        <span class="hub-code">DXB</span>
+        <p class="hub-city">Dubai, UAE</p>
+        <p class="hub-desc">The Global Bridge. Linking East and West, Dubai recovered fastest — rapid safety protocols and strategic early reopening let it outpace every rival hub.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BACKGROUND INTRO -->
+<section id="background">
+  <div class="section-inner">
+    <p class="sec-label fade-in">Background</p>
+    <h2 class="sec-title fade-in">Introduction</h2>
+    <div class="intro-split">
+      <div>
+        <p class="intro-pull">Aviation is globalization made visible — millions of people moving across borders every day.</p>
+        <p class="intro-body">Globalization refers to the increasing interconnectedness of countries through the movement of people, goods, services, and information. One of the most visible infrastructures supporting globalization is the global aviation network, which connects cities and regions through international flight routes.<br><br>Before the COVID-19 pandemic, air travel played a crucial role in enabling global mobility, supporting tourism, international education, migration, and business activities. Major airport hubs functioned as key nodes within a highly integrated global system.</p>
+      </div>
+      <div class="why-box">
+        <h3>Why This Topic?</h3>
+        <p>The global aviation network was selected as the focus of this project because it provides a clear and measurable representation of globalization in practice. Flight routes connect countries physically, while passenger flows reflect patterns of economic activity, tourism, and human mobility.</p>
+        <p>The COVID-19 pandemic represents one of the most significant disruptions to globalization in recent history. Travel restrictions and border closures led to a dramatic reduction in global mobility, making aviation an ideal case study to analyze how global systems respond to crisis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="background-timeline">
+  <div class="section-inner">
+    <p class="sec-label" style="color:var(--gold);">Timeline</p>
+    <h2 class="sec-title light">Global Flight Network Transformation</h2>
+    <p style="color:rgba(255,255,255,0.5); font-size:0.97rem; margin-top:0.5rem; max-width:600px;">A chronological analysis of how global flight networks evolved before, during, and after the pandemic — revealing the vulnerability and resilience of globalization.</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <p class="tl-period">2018 – 2019 · Before COVID-19</p>
+        <h3 class="tl-heading">The Connected Global Network</h3>
+        <p class="tl-body">Prior to the pandemic, the global flight network was highly developed and densely interconnected, reflecting strong globalization and increasing international mobility. Major hub airports such as Singapore Changi, Dubai International, and London Heathrow played a central role in linking Europe to global destinations, particularly for business and long-haul travel. Bali's Ngurah Rai Airport functioned as a tourism gateway, relying heavily on international visitors.</p>
+        <div class="tl-tags">
+          <span class="tl-tag">Dense global connections</span>
+          <span class="tl-tag">High passenger demand</span>
+          <span class="tl-tag">Hubs vs tourism airports</span>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot red"></div>
+        <p class="tl-period" style="color:#e74c3c;">2020 – 2021 · During COVID-19</p>
+        <h3 class="tl-heading">Disruption of Global Mobility</h3>
+        <p class="tl-body">The outbreak of COVID-19 caused a major disruption to global flight networks due to border closures, travel restrictions, and quarantine policies. This impact varied across airports. Singapore Changi and London Heathrow experienced sharp declines due to strict travel controls, while Dubai International maintained partial connectivity and recovered earlier. Bali Airport was among the most severely affected, as international tourism nearly stopped completely.</p>
+        <div class="tl-tags">
+          <span class="tl-tag red">Collapse of international air travel</span>
+          <span class="tl-tag red">Significant decline in passengers</span>
+          <span class="tl-tag red">Strong government control</span>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot teal"></div>
+        <p class="tl-period" style="color:var(--teal-light);">2022 – 2024 · After COVID-19</p>
+        <h3 class="tl-heading">Recovery and Transformation</h3>
+        <p class="tl-body">From 2022 onwards, the global aviation sector began to recover as travel restrictions were gradually lifted. Passenger demand increased significantly, driven by the reopening of international borders and renewed demand for travel. However, recovery was <strong style="color:var(--white)">uneven across regions</strong>. Major global hubs such as Dubai recovered more rapidly, while tourism-dependent destinations experienced slower growth. The pandemic also introduced long-term changes including <strong style="color:var(--white)">digital health verification systems</strong>, increased awareness of health risks, and shifts in travel behavior.</p>
+        <div class="tl-tags">
+          <span class="tl-tag teal">Gradual reopening</span>
+          <span class="tl-tag teal">Uneven recovery</span>
+          <span class="tl-tag teal">Digital health passports</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYSIS -->
+<section id="analysis">
+  <div class="section-inner">
+    <p class="sec-label fade-in">Data Analysis</p>
+    <h2 class="sec-title fade-in">Global Airport Traffic Analysis</h2>
+    <p class="sec-body fade-in">Air travel serves as a primary indicator of global interconnectedness. This analysis tracks passenger volumes across four key international gateways to measure the physical 'collapse' of globalization in 2020 and its projected full restoration by 2025. Toggle airports to compare their trajectories.</p>
+
+    <div class="chart-wrapper fade-in">
+      <div class="chart-controls" id="chartControls"></div>
+      <div class="chart-canvas-wrap">
+        <canvas id="trafficChart" role="img" aria-label="Line chart showing passenger volumes 2017-2025 for ATL, DXB, LHR, DPS">Passenger data for ATL, DXB, LHR, DPS from 2017 to 2025.</canvas>
+      </div>
+      <div class="chart-insight">
+        <div class="insight-item">
+          <p class="insight-year">2019 Peak</p>
+          <p class="insight-label">Pre-pandemic high (ATL)</p>
+          <p class="insight-val">110.5M</p>
+        </div>
+        <div class="insight-item">
+          <p class="insight-year">2020 Bottom</p>
+          <p class="insight-label">Bali passengers</p>
+          <p class="insight-val" style="color:#e74c3c;">3.7M</p>
+        </div>
+        <div class="insight-item">
+          <p class="insight-year">2021 Divide</p>
+          <p class="insight-label">ATL vs Bali gap</p>
+          <p class="insight-val">71.8M</p>
+        </div>
+        <div class="insight-item">
+          <p class="insight-year">2024 Recovery</p>
+          <p class="insight-label">DXB surpasses 2019</p>
+          <p class="insight-val" style="color:var(--teal-light);">92M</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Annotations -->
+    <div class="anno-grid fade-in">
+      <div class="anno-card">
+        <p class="anno-year">2017–2019 · Pre-Pandemic Baseline</p>
+        <h4 class="anno-heading">Steady, predictable global growth</h4>
+        <p class="anno-body">Atlanta (ATL) consistently leads the world above 100M passengers. Dubai (DXB) and London (LHR) track closely together in the high 80s, while Bali (DPS) grows steadily from 21M.</p>
+      </div>
+      <div class="anno-card red-border">
+        <p class="anno-year" style="color:var(--red);">2020 · The Global Collapse</p>
+        <h4 class="anno-heading">Total synchronization — every line plummets</h4>
+        <p class="anno-body">London (LHR) and Bali (DPS) drop by over 73%, marking the physical "collapse" of globalization. Every single airport line falls simultaneously — a uniquely global event.</p>
+      </div>
+      <div class="anno-card teal-border">
+        <p class="anno-year" style="color:var(--teal);">2021 · The Year of Divergence</p>
+        <h4 class="anno-heading">Atlanta & Dubai pivot upward; Bali bottoms</h4>
+        <p class="anno-body">The most revealing year: domestic ATL and strategic DXB immediately recover. London declines to its lowest (19.4M). Bali bottoms at a mere 3.7M due to strict island border closures.</p>
+      </div>
+      <div class="anno-card green-border">
+        <p class="anno-year" style="color:#27ae60;">2022–2025 · The New Global Normal</p>
+        <h4 class="anno-heading">Dubai outpaces pre-pandemic self</h4>
+        <p class="anno-body">By 2023, Dubai and Atlanta successfully claw back to — and exceed — their 2019 baselines. London settles into a plateau slightly below its pre-pandemic peak. Bali recovers but more slowly.</p>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-wrap fade-in">
+      <h3 class="data-table-title">Passenger Data Comparison (Millions)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Bali (DPS)</th>
+            <th>London (LHR)</th>
+            <th>Dubai (DXB)</th>
+            <th>Atlanta (ATL)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2017</td><td>21.0</td><td>78.0</td><td>88.2</td><td>103.9</td></tr>
+          <tr><td>2018</td><td>23.7</td><td>80.1</td><td>89.1</td><td>107.4</td></tr>
+          <tr><td>2019</td><td>24.1</td><td>80.9</td><td>86.4</td><td>110.5</td></tr>
+          <tr class="highlight"><td>2020 ⚠</td><td>6.2</td><td>22.1</td><td>25.9</td><td>42.9</td></tr>
+          <tr class="highlight"><td>2021 ⚠</td><td>3.7</td><td>19.4</td><td>29.1</td><td>75.7</td></tr>
+          <tr><td>2022</td><td>12.5</td><td>61.6</td><td>66.1</td><td>93.7</td></tr>
+          <tr><td>2023</td><td>21.4</td><td>79.2</td><td>86.9</td><td>104.6</td></tr>
+          <tr><td>2024</td><td>23.9</td><td>84.0</td><td>92.0</td><td>108.1</td></tr>
+          <tr><td>2025</td><td>25.2</td><td>84.4</td><td>95.2</td><td>106.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <p class="sec-label fade-in">About</p>
+    <h2 class="sec-title fade-in">Project Overview</h2>
+    <div class="about-split fade-in">
+      <div class="about-text">
+        <p>This project examines how the COVID-19 pandemic disrupted and transformed global aviation networks — one of the most measurable expressions of globalization. By tracking passenger volumes at four strategically chosen airports, we can observe how an external shock cascades through an integrated global system and then diverges unevenly in recovery.</p>
+        <p>The choice of ATL, DXB, LHR, and DPS is deliberate: they represent distinct node types. Atlanta is a domestic-led mega-hub, Dubai is a global transfer hub, Heathrow is a policy-sensitive international gateway, and Bali is a pure tourism sink. Together they tell the full story.</p>
+        <p>Through this lens, aviation becomes more than transportation — it becomes a real-time index of globalization itself.</p>
+      </div>
+      <div class="about-meta">
+        <div class="meta-row">
+          <p class="meta-label">Course</p>
+          <p class="meta-val">SS047 Introduction to Globalization</p>
+        </div>
+        <div class="meta-row">
+          <p class="meta-label">Project Title</p>
+          <p class="meta-val">Global Flight Networks Before and After COVID-19</p>
+        </div>
+        <div class="meta-row">
+          <p class="meta-label">Data Range</p>
+          <p class="meta-val">2017 – 2025</p>
+        </div>
+        <div class="meta-row">
+          <p class="meta-label">Airports Analyzed</p>
+          <p class="meta-val">ATL · DXB · LHR · DPS</p>
+        </div>
+        <div class="meta-row">
+          <p class="meta-label">Key Methodology</p>
+          <p class="meta-val">Annual passenger volume comparison across pre-, during-, and post-pandemic periods</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section id="sources">
+  <div class="section-inner">
+    <p class="sec-label" style="color:var(--gold);">Sources</p>
+    <h2 class="sec-title light">References & Data Sources</h2>
+    <div class="sources-grid fade-in">
+      <div class="source-card">
+        <p class="source-num">01</p>
+        <p class="source-title">Hartsfield-Jackson Atlanta International Airport (ATL) — Annual Reports</p>
+        <p class="source-meta">City of Atlanta, Department of Aviation</p>
+      </div>
+      <div class="source-card">
+        <p class="source-num">02</p>
+        <p class="source-title">Dubai International Airport (DXB) — Traffic Statistics</p>
+        <p class="source-meta">Dubai Airports Corporation</p>
+      </div>
+      <div class="source-card">
+        <p class="source-num">03</p>
+        <p class="source-title">London Heathrow Airport (LHR) — Passenger Statistics</p>
+        <p class="source-meta">Heathrow Airport Holdings Ltd.</p>
+      </div>
+      <div class="source-card">
+        <p class="source-num">04</p>
+        <p class="source-title">Ngurah Rai International Airport (DPS) — Traffic Data</p>
+        <p class="source-meta">Angkasa Pura I (Indonesia)</p>
+      </div>
+      <div class="source-card">
+        <p class="source-num">05</p>
+        <p class="source-title">IATA — Airline Industry Economic Performance</p>
+        <p class="source-meta">International Air Transport Association, 2020–2024</p>
+      </div>
+      <div class="source-card">
+        <p class="source-num">06</p>
+        <p class="source-title">ICAO — Effects of Novel Coronavirus (COVID-19) on Civil Aviation</p>
+        <p class="source-meta">International Civil Aviation Organization, 2021</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2025 · SS047 Introduction to Globalization · Global Flight Networks & COVID-19
+</footer>
+
+<script>
+/* ── CHART ── */
+const years  = [2017,2018,2019,2020,2021,2022,2023,2024,2025];
+const airports = [
+  { code:'ATL', label:'Atlanta (ATL)', color:'#c9a84c', data:[103.9,107.4,110.5,42.9,75.7,93.7,104.6,108.1,106.3] },
+  { code:'DXB', label:'Dubai (DXB)',   color:'#2ec4a9', data:[88.2,89.1,86.4,25.9,29.1,66.1,86.9,92.0,95.2]   },
+  { code:'LHR', label:'London (LHR)',  color:'#e8c97a', data:[78.0,80.1,80.9,22.1,19.4,61.6,79.2,84.0,84.4]   },
+  { code:'DPS', label:'Bali (DPS)',    color:'#e74c3c', data:[21.0,23.7,24.1,6.2,3.7,12.5,21.4,23.9,25.2]     }
+];
+
+const active = new Set(['ATL','DXB','LHR','DPS']);
+
+const controls = document.getElementById('chartControls');
+airports.forEach(a => {
+  const btn = document.createElement('button');
+  btn.className = 'airport-btn';
+  btn.style.borderColor = a.color;
+  btn.style.color = a.color;
+  btn.innerHTML = `<span class="dot" style="background:${a.color}"></span>${a.label}`;
+  btn.dataset.code = a.code;
+  btn.addEventListener('click', () => {
+    if (active.has(a.code)) active.delete(a.code);
+    else active.add(a.code);
+    btn.classList.toggle('inactive', !active.has(a.code));
+    updateChart();
+  });
+  controls.appendChild(btn);
+});
+
+const ctx = document.getElementById('trafficChart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: airports.map(a => ({
+      label: a.label,
+      data: a.data,
+      borderColor: a.color,
+      backgroundColor: a.color + '18',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointHoverRadius: 7,
+      pointBackgroundColor: a.color,
+      tension: 0.35,
+      fill: false
+    }))
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0d1b2a',
+        borderColor: 'rgba(201,168,76,0.3)',
+        borderWidth: 1,
+        titleColor: '#c9a84c',
+        bodyColor: 'rgba(255,255,255,0.8)',
+        padding: 12,
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}M`
+        }
+      },
+      annotation: {}
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(13,27,42,0.06)' },
+        ticks: { color: '#3d5268', font: { family: "'DM Mono', monospace", size: 12 } }
+      },
+      y: {
+        min: 0, max: 130,
+        grid: { color: 'rgba(13,27,42,0.06)' },
+        ticks: {
+          color: '#3d5268',
+          font: { family: "'DM Mono', monospace", size: 11 },
+          callback: v => v + 'M'
+        },
+        title: {
+          display: true, text: 'Passengers (Millions)',
+          color: '#3d5268', font: { size: 12 }
+        }
+      }
+    }
+  }
+});
+
+function updateChart() {
+  chart.data.datasets.forEach((ds, i) => {
+    ds.hidden = !active.has(airports[i].code);
+  });
+  chart.update();
+}
+
+/* ── SCROLL ANIMATIONS ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in, .tl-item').forEach(el => observer.observe(el));
+
+/* ── ACTIVE NAV ── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const navObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => navObserver.observe(s));
+</script>
+</body>
+</html>
