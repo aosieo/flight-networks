@@ -123,7 +123,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,27,42,0.9
 .hub-card:hover .hub-desc{color:rgba(255,255,255,.55)}
 .hub-type{display:inline-block;font-family:var(--font-mono);font-size:.62rem;padding:.2rem .6rem;background:var(--cream-dark);color:var(--text-mid);border-radius:2px;margin-bottom:.8rem;transition:background .25s,color .25s}
 .hub-card:hover .hub-type{background:rgba(201,168,76,.15);color:var(--gold)}
-.hub-card:hover .hub-code{color:var(--gold-light)}
+.hub-card:hover .hub-code{color:var(--gold-light)
+.airport-img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:4px;
+  margin-bottom:1rem;
+}
 
 /* ANALYSIS */
 #page-analysis{background:var(--cream)}
@@ -344,24 +351,28 @@ footer{background:var(--navy);border-top:1px solid rgba(201,168,76,.15);text-ali
 
     <div class="hubs-grid fi" style="margin-top:2.5rem">
       <div class="hub-card">
+        <img src="images/ATL.jpg" class="airport-img">
         <span class="hub-code">ATL</span>
         <span class="hub-type">Domestic Mega-Hub</span>
         <p class="hub-city">Atlanta Hartsfield-Jackson, Georgia, USA</p>
         <p class="hub-desc">The world's busiest airport by total passenger count for over two decades. ATL's resilience during COVID-19 came from a key structural advantage: the majority of its traffic is domestic. When international routes collapsed, US domestic travel — driven by essential workers, cargo, and later leisure travel — kept Atlanta active far beyond its peers.<br><br>In 2020, ATL fell 61% from its 2019 peak of 110.5M to 42.9M — steep, but the shallowest decline among the four. By 2021 it had already partially recovered to 75.7M, and by 2023 it had surpassed its pre-pandemic record. ATL demonstrates that geographic scale and domestic market depth are powerful buffers against global disruption.</p>
       </div>
       <div class="hub-card">
+        <img src="images/BALI.jpg" class="airport-img">
         <span class="hub-code">DPS</span>
         <span class="hub-type">Tourism Gateway</span>
         <p class="hub-city">Ngurah Rai International Airport, Bali, Indonesia</p>
         <p class="hub-desc">Bali's Ngurah Rai airport is almost entirely dependent on international tourism — there is virtually no domestic aviation market that could substitute when borders closed. When Indonesia shut its international borders in April 2020, passenger traffic did not merely decline — it effectively ceased. DPS fell 74% in 2020 and continued to decline in 2021 to just 3.7M passengers, an 85% drop from its 2019 level of 24.1M.<br><br>This extreme vulnerability makes Bali one of the starkest examples of how globalization's benefits — in this case, mass tourism — can be fully reversed by a single policy change. Recovery was slow and uneven, heavily conditional on Indonesia's willingness to reopen borders. DPS's story is a cautionary tale about mono-dependency in a globalized economy.</p>
       </div>
       <div class="hub-card">
+        <img src="images/LHR.jpg" class="airport-img">
         <span class="hub-code">LHR</span>
         <span class="hub-type">Policy-Sensitive Gateway</span>
         <p class="hub-city">London Heathrow Airport, United Kingdom</p>
         <p class="hub-desc">Heathrow is the busiest airport in Europe and one of the world's key long-haul hubs, connecting the UK to over 180 destinations globally. Its COVID-19 trajectory is uniquely shaped by UK government policy — the traffic-light travel system, PCR testing mandates, self-isolation rules, and the complex regulatory aftermath of Brexit all left visible marks on its recovery curve.<br><br>LHR fell 73% to 22.1M in 2020 and continued to decline to 19.4M in 2021 — its absolute lowest — as the UK maintained stricter travel controls than many peers. From 2022, strong demand for transatlantic and European travel drove a rapid rebound, with LHR reaching 84M by 2024. However, it remains slightly below its 2019 peak of 80.9M when adjusted for trend, a reminder that policy environments profoundly shape aviation's recovery.</p>
       </div>
       <div class="hub-card">
+        <img src="images/DXB2.jpg" class="airport-img">
         <span class="hub-code">DXB</span>
         <span class="hub-type">Global Transfer Hub</span>
         <p class="hub-city">Dubai International Airport, United Arab Emirates</p>
